@@ -19,6 +19,8 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 @Composable
 fun HomeScreen(
     ViewModel: HomeViewModel = viewModel(),
+    onNavigateToCosplayScreen: () -> Unit,
+    onNavigateToConScreen: () -> Unit
 ) {
     Scaffold(
         topBar = {
@@ -38,10 +40,14 @@ fun HomeScreen(
                     .padding(40.dp),
                 horizontalArrangement = Arrangement.SpaceEvenly
             ) {
-                Button(onClick = { /*TODO*/ }) {
+                Button(onClick = {
+                    onNavigateToConScreen()
+                }) {
                     Text(text = "Cons")
                 }
-                Button(onClick = { /*TODO*/ }) {
+                Button(onClick = {
+                    onNavigateToCosplayScreen()
+                }) {
                     Text(text = "Cosplays")
                 }
                 Button(onClick = { /*TODO*/ }) {
