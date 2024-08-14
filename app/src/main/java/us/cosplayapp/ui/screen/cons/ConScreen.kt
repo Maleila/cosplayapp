@@ -8,6 +8,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.Search
@@ -23,6 +25,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -35,6 +38,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.viewmodel.compose.viewModel
+import us.cosplayapp.Con.Con
 import us.cosplayapp.ui.screen.home.HomeViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -46,6 +50,10 @@ fun ConScreen(
     var showAddDialog by rememberSaveable {
         mutableStateOf(false)
     }
+
+    val conListState = conViewModel.conList().collectAsState(
+        initial = ConUploadUiState.Init
+    )
 
     Scaffold(
         topBar = {
@@ -75,7 +83,24 @@ fun ConScreen(
         }
     ) {
         Column(modifier = Modifier.padding(it)) {
-
+            if (conListState.value == ConUploadUiState.Init) {
+                Text(text = "loading",
+                    modifier = Modifier.padding(10.dp))
+            } else if (conListState.value is ConUploadUiState.Success) {
+                if ((conListState.value as ConUploadUiState.Success).conList.isEmpty()
+                ) {
+                    Text(text = "loading or something idk",
+                        modifier = Modifier.padding(10.dp))
+                } else {
+                    LazyColumn() {
+                        items((conListState.value as ConUploadUiState.Success).conList) {
+                            ConCard(con = it.con
+//                                onCardClicked = { onNavigateToDetailsScreen(it.con.name)}
+                                                        )
+                        }
+                    }
+                }
+            }
         }
         if (showAddDialog) {
             AddDialogue(
@@ -87,7 +112,7 @@ fun ConScreen(
 
 @Composable
 fun ConCard(
-    //con: Con,
+    con: Con,
     onCardClicked: () -> Unit = {}
 ) {
     Card(
@@ -117,7 +142,7 @@ fun ConCard(
                     modifier = Modifier
                         .weight(1f)
                 ) {
-                    Text(text = "test card")
+                    Text(text = con.name)
                 }
             }
         }
@@ -192,12 +217,10 @@ fun AddDialogue(
                         containerColor = Color.White
                     ),
                     onClick = {
-//                        conViewModel.addCon(
-//                            Con(
-//                                name,
-//                                date,
-//                                location
-//                            )
+                        conViewModel.addCon(
+                                name,
+                                date,
+                                location)
                         onDialogDismiss()
                     }) {
                     Text(text = "Add")
