@@ -1,12 +1,12 @@
 package us.cosplayapp.ui.screen.cosplayDetails
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.callbackFlow
 import us.cosplayapp.Cosplay.Cosplay
 import us.cosplayapp.Cosplay.CosplayWithId
-import us.cosplayapp.ui.screen.cosplay.CosplayUploadUiState
 import us.cosplayapp.ui.screen.cosplay.CosplayViewModel
 
 class CosplayDetailsViewModel : ViewModel(
@@ -18,7 +18,7 @@ class CosplayDetailsViewModel : ViewModel(
 
     fun cosList() = callbackFlow {
         val snapshotListener =
-            FirebaseFirestore.getInstance().collection(CosplayViewModel.COLLECTION_COSPLAYS)
+            FirebaseFirestore.getInstance().collection(COLLECTION_COSPLAYS)
                 .addSnapshotListener() { snapshot, e ->
                     val response = if (snapshot != null) {
                         val cosList = snapshot.toObjects(Cosplay::class.java)
@@ -42,14 +42,55 @@ class CosplayDetailsViewModel : ViewModel(
         }
     }
 
-    fun getCosplayByName(character: String, cosplays: List<CosplayWithId>): Cosplay {
+//    fun getCosplayByName(character: String, cosplays: List<CosplayWithId>): Cosplay {
+//        for(c in cosplays) {
+//            if(c.cosplay.character == character) {
+//                return c.cosplay
+//            }
+//        }
+//
+//        return Cosplay("", "", "","", "", "", "")
+//    }
+
+    fun getCosplayById(id: String, cosplays: List<CosplayWithId>): Cosplay {
         for(c in cosplays) {
-            if(c.cosplay.character == character) {
+            if(c.cosId == id) {
                 return c.cosplay
             }
         }
 
         return Cosplay("", "", "","", "", "", "")
+    }
+
+    fun editCosplay(newCosplay: Cosplay, characterId: String, cosplays: List<CosplayWithId>) {
+        //TODO not sure this is the best way to do it
+
+//        Log.d("COSPLAY", character)
+//        FirebaseFirestore.getInstance().collection(COLLECTION_COSPLAYS)
+//            .whereEqualTo("character", newCosplay.character)
+//            .get()
+//            .addOnSuccessListener { documents ->
+//                for (document in documents) {
+//                    Log.d("COSPLAY", "Found the character!")
+//                    Log.d("COSPLAY", "${document.id} => ${document.data}")
+//                    cosRef = document.id
+//                }
+//            }
+//            .addOnFailureListener { exception ->
+//                Log.w("COSPLAY", "Error getting documents: ", exception)
+//            }
+
+        Log.d("COSPLAY", characterId)
+
+        FirebaseFirestore.getInstance().collection(COLLECTION_COSPLAYS).document(characterId)
+            .update(mapOf(
+                "character" to newCosplay.character,
+                "media" to newCosplay.media,
+                "mediaType" to newCosplay.mediaType,
+                "progress" to newCosplay.progress,
+                "complexity" to newCosplay.complexity))
+            .addOnSuccessListener { Log.d("tag", "DocumentSnapshot successfully updated!") }
+            .addOnFailureListener { e -> Log.w("Error updating document", e) }
     }
 
     sealed interface CosplayDetailsUIState {

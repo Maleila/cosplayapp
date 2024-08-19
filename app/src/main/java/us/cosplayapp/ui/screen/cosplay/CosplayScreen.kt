@@ -105,7 +105,7 @@ fun CosplayScreen(
                     LazyColumn() {
                         items((cosplayListState.value as CosplayUploadUiState.Success).cosList) {
                             CosplayCard(cosplay = it.cosplay,
-                                onCardClicked = { onNavigateToDetailsScreen(it.cosplay.character)}
+                                onCardClicked = { onNavigateToDetailsScreen(it.cosId)}
                             )
                         }
                     }
@@ -278,8 +278,8 @@ fun AddDialogue(
                             character,
                             media,
                             mediaType,
-                            progress,
                             complexity,
+                            progress,
                             notes)
                         onDialogDismiss()
                     }) {
