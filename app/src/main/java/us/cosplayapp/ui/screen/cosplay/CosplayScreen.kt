@@ -35,6 +35,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -50,6 +51,8 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.Popup
 import androidx.lifecycle.viewmodel.compose.viewModel
 import us.cosplayapp.Cosplay.Cosplay
+import us.cosplayapp.Cosplay.CosplayWithId
+import us.cosplayapp.navigation.Screen
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -62,9 +65,18 @@ fun CosplayScreen(
         mutableStateOf(false)
     }
 
+    var showFilterDialogue by rememberSaveable {
+         mutableStateOf(false)
+    }
+
     val cosplayListState = cosplayViewModel.cosList().collectAsState(
         initial = CosplayUploadUiState.Init
     )
+
+    LaunchedEffect(true) {
+        cosplayViewModel.filter()
+    }
+
     Scaffold(
         topBar = {
             Column(
@@ -93,32 +105,78 @@ fun CosplayScreen(
         }
     ) {
         Column(modifier = Modifier.padding(it)) {
-            if (cosplayListState.value == CosplayUploadUiState.Init) {
-                Text(text = "loading",
-                    modifier = Modifier.padding(10.dp))
-            } else if (cosplayListState.value is CosplayUploadUiState.Success) {
-                if ((cosplayListState.value as CosplayUploadUiState.Success).cosList.isEmpty()
+            //if (cosplayListState.value == CosplayUploadUiState.Init) {
+            if (cosplayViewModel.filterUiState == CosplayUploadUiState.Init ||
+                cosplayViewModel.filterUiState == CosplayUploadUiState.LoadingCosplayUpload
+            ) {
+                Text(
+                    text = "loading",
+                    modifier = Modifier.padding(10.dp)
+                )
+                //} else if (cosplayListState.value is CosplayUploadUiState.Success) {
+            } else if (cosplayViewModel.filterUiState is CosplayUploadUiState.Success) {
+                //if ((cosplayListState.value as CosplayUploadUiState.Success).cosList.isEmpty()
+                if ((cosplayViewModel.filterUiState as CosplayUploadUiState.Success).cosList.isEmpty()
                 ) {
-                    Text(text = "loading or something idk",
-                        modifier = Modifier.padding(10.dp))
+                    Text(
+                        text = "no results :(",
+                        modifier = Modifier.padding(10.dp)
+                    )
                 } else {
+                    Button(onClick = {
+                        showFilterDialogue = true
+                    }) {
+                        Text(text = "Filter")
+                    }
                     LazyColumn() {
-                        items((cosplayListState.value as CosplayUploadUiState.Success).cosList) {
+                        //items((cosplayListState.value as CosplayUploadUiState.Success).cosList) {
+                        items((cosplayViewModel.filterUiState as CosplayUploadUiState.Success).cosList) {
                             CosplayCard(cosplay = it.cosplay,
-                                onCardClicked = { onNavigateToDetailsScreen(it.cosId)}
+                                onCardClicked = { onNavigateToDetailsScreen(it.cosId) }
                             )
                         }
                     }
                 }
             }
+
+//            when (cosplayViewModel.filterUiState) {
+//                is CosplayUploadUiState.Init -> Text(text = "loading")
+//                is CosplayUploadUiState.LoadingCosplayUpload -> Text(text = "more loading")
+//                is CosplayUploadUiState.Success ->
+//                LazyColumn() {
+//                    //items((cosplayListState.value as CosplayUploadUiState.Success).cosList) {
+//                    items((cosplayViewModel.filterUiState as CosplayUploadUiState.Success).cosList) {
+//                        CosplayCard(cosplay = it.cosplay,
+//                            onCardClicked = { onNavigateToDetailsScreen(it.cosId)}
+//                        )
+//                    }
+//                }
+//                is CosplayUploadUiState.Error -> Text(text = "error!")
+//                is CosplayUploadUiState.CosplayUploadSuccess -> Text(text = "this one is redundant I think")
+//            }
+//            }
+//        Button(onClick = {
+//                            showFilterDialogue = true
+//                        }) {
+//                            Text(text = "Filter")
+//                        }
         }
+    }
         if (showAddDialog) {
             AddDialogue(
                 cosplayViewModel,
                 { showAddDialog = false })
         }
+
+        if(showFilterDialogue) {
+            FilterDialogue(
+                cosplayViewModel,
+                {showFilterDialogue = false},
+                (cosplayListState.value as CosplayUploadUiState.Success).cosList
+            )
+        }
     }
-}
+
 
 @Composable
 fun CosplayCard(
@@ -291,6 +349,91 @@ fun AddDialogue(
     }
 }
 
+@Composable
+fun FilterDialogue(
+    cosplayViewModel: CosplayViewModel,
+    onDialogDismiss: () -> Unit = {},
+    cosplays: List<CosplayWithId>
+) {
+    var mediaType by rememberSaveable {
+        mutableStateOf("")
+    }
+
+    var progress by rememberSaveable {
+        mutableStateOf("")
+    }
+
+    var complexity by rememberSaveable {
+        mutableStateOf("")
+    }
+
+    Dialog(
+        onDismissRequest = onDialogDismiss
+    ) {
+        Column(
+            Modifier
+                .background(
+                    color = MaterialTheme.colorScheme.secondaryContainer,
+                    shape = MaterialTheme.shapes.medium
+                )
+                .padding(10.dp)
+        ) {
+            Text(text = "Media type", modifier = Modifier.padding(horizontal = 10.dp))
+            Dropdown(
+                listOf("Anime", "Movie", "Show", "Podcast", "Book", "Other", "Any"),
+                preselected = "Any",
+                onSelectionChanged = {
+                    mediaType = it
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(10.dp)
+            )
+            //code from https://developer.android.com/develop/ui/compose/components/datepickers
+            Text(text = "Complexity", modifier = Modifier.padding(horizontal = 10.dp))
+            Dropdown(
+                listOf("Simple", "Medium", "Complicated", "Any"),
+                preselected = "Any",
+                onSelectionChanged = {
+                    complexity = it
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(10.dp)
+            )
+            Text(text = "Progress", modifier = Modifier.padding(horizontal = 10.dp))
+            Dropdown(
+                listOf("Not started", "In Progress", "Completed", "Any"),
+                preselected = "Any",
+                onSelectionChanged = {
+                    progress = it
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(10.dp)
+            )
+
+            Row {
+                Button(modifier = Modifier.padding(10.dp),
+                    colors = ButtonDefaults.outlinedButtonColors(
+                        contentColor = Color.Black,
+                        containerColor = Color.White
+                    ),
+                    onClick = {
+                        cosplayViewModel.mediaTypeParam = mediaType
+                        cosplayViewModel.complexityParam = complexity
+                        cosplayViewModel.progressParam = progress
+                        cosplayViewModel.filter()
+                        onDialogDismiss()
+                    }) {
+                    Text(text = "Filter")
+                }
+
+            }
+        }
+    }
+}
+
 //code from mobile fall 23
 @Composable
 fun Dropdown(
@@ -298,21 +441,23 @@ fun Dropdown(
     preselected: String,
     onSelectionChanged: (myData: String) -> Unit,
     modifier: Modifier = Modifier
-){
+) {
     var selected by remember { mutableStateOf(preselected) }
     var expanded by remember { mutableStateOf(false) }
     OutlinedCard(
         modifier = modifier.clickable {
             expanded = !expanded
-        } ) {
+        }) {
         Row(
-            horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically,
         ) {
             Text(
                 text = selected,
                 modifier = Modifier
                     .weight(1f)
-                    .padding(horizontal = 16.dp, vertical = 8.dp))
+                    .padding(horizontal = 16.dp, vertical = 8.dp)
+            )
             Icon(Icons.Outlined.ArrowDropDown, null, modifier = Modifier.padding(8.dp))
             DropdownMenu(
                 expanded = expanded,
@@ -323,7 +468,7 @@ fun Dropdown(
                         onClick = {
                             selected = listEntry
                             expanded = false
-                            onSelectionChanged (selected)
+                            onSelectionChanged(selected)
                         },
                         text = {
                             Text(

@@ -1,12 +1,18 @@
 package us.cosplayapp.ui.screen.cosplay
 
+import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
 import us.cosplayapp.Con.Con
 import us.cosplayapp.Con.ConWithId
 import us.cosplayapp.Cosplay.CosplayWithId
@@ -17,8 +23,20 @@ class CosplayViewModel: ViewModel() {
         const val COLLECTION_COSPLAYS = "cosplays"  //where to look in the database
     }
 
+    var filterUiState: CosplayUploadUiState by mutableStateOf(CosplayUploadUiState.Init)
+
     var cosUploadUiState: CosplayUploadUiState
             by mutableStateOf(CosplayUploadUiState.Init)
+
+    var mediaTypeParam by
+        mutableStateOf("Anime")
+
+    var complexityParam by
+        mutableStateOf("Any")
+
+    var progressParam by
+            mutableStateOf("Any")
+
 
     fun addCosplay(
         character: String,
@@ -72,6 +90,60 @@ class CosplayViewModel: ViewModel() {
         awaitClose {
             snapshotListener.remove()
         }
+    }
+
+    //TODO will want to be able to search by media itself but that'll take a searchable dropdown so come back to to that
+    private suspend fun query(): MutableList<CosplayWithId> {
+        var filtered: MutableList<CosplayWithId> = mutableListOf()
+        var filteredIds: MutableList<String> = mutableListOf()
+        var cosList: MutableList<Cosplay> = mutableListOf()
+
+        FirebaseFirestore.getInstance().collection(COLLECTION_COSPLAYS)
+            .whereEqualTo("mediaType", mediaTypeParam)
+            .get()
+            .addOnSuccessListener { documents ->
+                for (document in documents) {
+                    Log.d("SEARCH", document.id)
+                    filteredIds.add(document.id)
+                    cosList.add(document.toObject(Cosplay::class.java))
+                }
+                cosList.forEachIndexed { index, cos ->
+                    filtered.add(CosplayWithId(filteredIds[index], cos))
+                }
+            }
+            .addOnFailureListener { exception ->
+                Log.w("SEARCH", "Error getting documents: ", exception)
+            }
+            .await() //kinda just tacked this on here not sure about that
+
+        return filtered
+    }
+
+    fun filter() {
+        //filterUiState = CosplayUploadUiState.Init
+        //^^lowkey a bad idea come back to this, pretty sure it'll crash if it errors out
+        viewModelScope.launch {
+            filterUiState = try {
+                val filteredCosplays = query()
+                CosplayUploadUiState.Success(
+                    filteredCosplays
+                )
+            } catch (e: Exception) {
+                Log.d("FILTER", e.toString())
+                CosplayUploadUiState.Error(e?.message.toString())
+            }
+        }
+    }
+
+    fun getCosplayById(id: String, cosplays: List<CosplayWithId>): CosplayWithId {
+        for(c in cosplays) {
+            if(c.cosId == id) {
+                Log.d("SEARCH", c.cosplay.character)
+                return c
+            }
+        }
+
+        return CosplayWithId( "",Cosplay("", "", "","", "", "", ""),)
     }
 }
 
