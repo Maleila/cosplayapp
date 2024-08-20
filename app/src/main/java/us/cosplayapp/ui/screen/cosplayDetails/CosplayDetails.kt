@@ -12,11 +12,15 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.CutCornerShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Build
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -97,7 +101,8 @@ fun CosplayDetails(
 fun cosplayDetails(cosplay: Cosplay,
                    onEditCosplay: (Cosplay) -> Unit = {})
 {
-    Row() {
+    Row(modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.Center) {
         Text(
             text = cosplay.character,
             style = MaterialTheme.typography.titleLarge,
@@ -112,22 +117,31 @@ fun cosplayDetails(cosplay: Cosplay,
             tint = Color.Blue
         )
     }
-    Spacer(modifier = Modifier.fillMaxHeight(0.04f))
-    Text(
-        text = cosplay.media + " (" + cosplay.mediaType + ")",
-        style = MaterialTheme.typography.bodyLarge,
-        modifier = Modifier.padding(10.dp)
-    )
-    Text(
-        text = cosplay.progress,
-        style = MaterialTheme.typography.bodyMedium,
-        modifier = Modifier.padding(10.dp)
-    )
+    Spacer(modifier = Modifier.fillMaxHeight(0.02f))
+    Row(modifier = Modifier.fillMaxWidth()) {
+        Row(modifier = Modifier.fillMaxWidth(0.7f),
+            horizontalArrangement = Arrangement.Start) {
+            Text(
+                text = cosplay.media + " (" + cosplay.mediaType + ")",
+                style = MaterialTheme.typography.bodyLarge,
+                modifier = Modifier.padding(10.dp)
+            )
+        }
+        Row(modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.End) {
+            Text(
+                text = cosplay.progress,
+                style = MaterialTheme.typography.bodyMedium,
+                modifier = Modifier.padding(10.dp)
+            )
+        }
+    }
     Text(
         text = cosplay.complexity,
         style = MaterialTheme.typography.bodyMedium,
         modifier = Modifier.padding(10.dp)
     )
+
     Text(
         text = cosplay.notes,
         style = MaterialTheme.typography.bodyMedium,

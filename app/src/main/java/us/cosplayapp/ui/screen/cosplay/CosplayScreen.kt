@@ -105,7 +105,6 @@ fun CosplayScreen(
         }
     ) {
         Column(modifier = Modifier.padding(it)) {
-            //if (cosplayListState.value == CosplayUploadUiState.Init) {
             if (cosplayViewModel.filterUiState == CosplayUploadUiState.Init ||
                 cosplayViewModel.filterUiState == CosplayUploadUiState.LoadingCosplayUpload
             ) {
@@ -113,15 +112,23 @@ fun CosplayScreen(
                     text = "loading",
                     modifier = Modifier.padding(10.dp)
                 )
-                //} else if (cosplayListState.value is CosplayUploadUiState.Success) {
             } else if (cosplayViewModel.filterUiState is CosplayUploadUiState.Success) {
-                //if ((cosplayListState.value as CosplayUploadUiState.Success).cosList.isEmpty()
                 if ((cosplayViewModel.filterUiState as CosplayUploadUiState.Success).cosList.isEmpty()
-                ) {
+                ) { Column() {
+                    Button(onClick = {
+                        //TODO should extract this into a reset method
+                        cosplayViewModel.mediaTypeParam = "Any"
+                        cosplayViewModel.complexityParam = "Any"
+                        cosplayViewModel.progressParam = "Any"
+                        cosplayViewModel.filter()
+                    }) {
+                        Text(text = "Clear")
+                    }
                     Text(
                         text = "no results :(",
                         modifier = Modifier.padding(10.dp)
                     )
+                }
                 } else {
                     Button(onClick = {
                         showFilterDialogue = true
@@ -129,7 +136,6 @@ fun CosplayScreen(
                         Text(text = "Filter")
                     }
                     LazyColumn() {
-                        //items((cosplayListState.value as CosplayUploadUiState.Success).cosList) {
                         items((cosplayViewModel.filterUiState as CosplayUploadUiState.Success).cosList) {
                             CosplayCard(cosplay = it.cosplay,
                                 onCardClicked = { onNavigateToDetailsScreen(it.cosId) }
@@ -138,28 +144,6 @@ fun CosplayScreen(
                     }
                 }
             }
-
-//            when (cosplayViewModel.filterUiState) {
-//                is CosplayUploadUiState.Init -> Text(text = "loading")
-//                is CosplayUploadUiState.LoadingCosplayUpload -> Text(text = "more loading")
-//                is CosplayUploadUiState.Success ->
-//                LazyColumn() {
-//                    //items((cosplayListState.value as CosplayUploadUiState.Success).cosList) {
-//                    items((cosplayViewModel.filterUiState as CosplayUploadUiState.Success).cosList) {
-//                        CosplayCard(cosplay = it.cosplay,
-//                            onCardClicked = { onNavigateToDetailsScreen(it.cosId)}
-//                        )
-//                    }
-//                }
-//                is CosplayUploadUiState.Error -> Text(text = "error!")
-//                is CosplayUploadUiState.CosplayUploadSuccess -> Text(text = "this one is redundant I think")
-//            }
-//            }
-//        Button(onClick = {
-//                            showFilterDialogue = true
-//                        }) {
-//                            Text(text = "Filter")
-//                        }
         }
     }
         if (showAddDialog) {
