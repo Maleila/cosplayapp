@@ -171,8 +171,7 @@ fun CosplayScreen(
         if(showFilterDialogue) {
             FilterDialogue(
                 cosplayViewModel,
-                {showFilterDialogue = false},
-                (cosplayListState.value as CosplayUploadUiState.Success).cosList
+                {showFilterDialogue = false}
             )
         }
     }
@@ -352,19 +351,18 @@ fun AddDialogue(
 @Composable
 fun FilterDialogue(
     cosplayViewModel: CosplayViewModel,
-    onDialogDismiss: () -> Unit = {},
-    cosplays: List<CosplayWithId>
+    onDialogDismiss: () -> Unit = {}
 ) {
     var mediaType by rememberSaveable {
-        mutableStateOf("")
+        mutableStateOf("Any")
     }
 
     var progress by rememberSaveable {
-        mutableStateOf("")
+        mutableStateOf("Any")
     }
 
     var complexity by rememberSaveable {
-        mutableStateOf("")
+        mutableStateOf("Any")
     }
 
     Dialog(
@@ -381,7 +379,7 @@ fun FilterDialogue(
             Text(text = "Media type", modifier = Modifier.padding(horizontal = 10.dp))
             Dropdown(
                 listOf("Anime", "Movie", "Show", "Podcast", "Book", "Other", "Any"),
-                preselected = "Any",
+                preselected = mediaType,
                 onSelectionChanged = {
                     mediaType = it
                 },
@@ -393,7 +391,7 @@ fun FilterDialogue(
             Text(text = "Complexity", modifier = Modifier.padding(horizontal = 10.dp))
             Dropdown(
                 listOf("Simple", "Medium", "Complicated", "Any"),
-                preselected = "Any",
+                preselected = complexity,
                 onSelectionChanged = {
                     complexity = it
                 },
@@ -404,7 +402,7 @@ fun FilterDialogue(
             Text(text = "Progress", modifier = Modifier.padding(horizontal = 10.dp))
             Dropdown(
                 listOf("Not started", "In Progress", "Completed", "Any"),
-                preselected = "Any",
+                preselected = progress,
                 onSelectionChanged = {
                     progress = it
                 },

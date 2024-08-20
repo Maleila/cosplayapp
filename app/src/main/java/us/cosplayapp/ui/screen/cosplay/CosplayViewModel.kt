@@ -29,7 +29,7 @@ class CosplayViewModel: ViewModel() {
             by mutableStateOf(CosplayUploadUiState.Init)
 
     var mediaTypeParam by
-        mutableStateOf("Anime")
+        mutableStateOf("Any")
 
     var complexityParam by
         mutableStateOf("Any")
@@ -61,6 +61,7 @@ class CosplayViewModel: ViewModel() {
             COLLECTION_COSPLAYS)
         postCollection.add(myCos).addOnSuccessListener {
             cosUploadUiState = CosplayUploadUiState.CosplayUploadSuccess
+            filter()
         }.addOnFailureListener{
             cosUploadUiState = CosplayUploadUiState.Error(it.message)
         }
@@ -98,23 +99,34 @@ class CosplayViewModel: ViewModel() {
         var filteredIds: MutableList<String> = mutableListOf()
         var cosList: MutableList<Cosplay> = mutableListOf()
 
-        FirebaseFirestore.getInstance().collection(COLLECTION_COSPLAYS)
-            .whereEqualTo("mediaType", mediaTypeParam)
-            .get()
-            .addOnSuccessListener { documents ->
-                for (document in documents) {
-                    Log.d("SEARCH", document.id)
-                    filteredIds.add(document.id)
-                    cosList.add(document.toObject(Cosplay::class.java))
-                }
-                cosList.forEachIndexed { index, cos ->
-                    filtered.add(CosplayWithId(filteredIds[index], cos))
-                }
+        var q = FirebaseFirestore.getInstance().collection(COLLECTION_COSPLAYS).whereEqualTo("uid", "")
+        if(mediaTypeParam != "Any") {
+            q = q.whereEqualTo("mediaType", mediaTypeParam)
+        }
+        if(complexityParam != "Any") {
+            q = q.whereEqualTo("complexity", complexityParam)
+        }
+        if(progressParam != "Any") {
+            q = q.whereEqualTo("progress", progressParam)
+        }
+
+        Log.d("FILTER", mediaTypeParam + ", " + complexityParam + ", " + progressParam)
+
+        q.get()
+        .addOnSuccessListener { documents ->
+            for (document in documents) {
+                Log.d("SEARCH", document.id)
+                filteredIds.add(document.id)
+                cosList.add(document.toObject(Cosplay::class.java))
             }
-            .addOnFailureListener { exception ->
-                Log.w("SEARCH", "Error getting documents: ", exception)
+            cosList.forEachIndexed { index, cos ->
+                filtered.add(CosplayWithId(filteredIds[index], cos))
             }
-            .await() //kinda just tacked this on here not sure about that
+        }
+        .addOnFailureListener { exception ->
+            Log.w("SEARCH", "Error getting documents: ", exception)
+        }
+        .await() //kinda just tacked this on here not sure about that
 
         return filtered
     }
