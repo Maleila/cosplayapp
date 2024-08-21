@@ -54,8 +54,6 @@ class CosplayDetailsViewModel : ViewModel(
                 = cosplay.cosplay.toDo.toMutableList()
         newTodos[index] = newTodo
 
-        //won't work bc this is trying to update ALL the todo's to this one new todo
-        //try sending it w the index in the list? not 100% sure how I would get that tho...
         Log.d("TODO", "updating to " + newTodo)
 
         FirebaseFirestore.getInstance().collection(COLLECTION_COSPLAYS).document(cosplay.cosId)
@@ -63,6 +61,25 @@ class CosplayDetailsViewModel : ViewModel(
                 "toDo" to newTodos))
             .addOnSuccessListener { Log.d("tag", "todo item successfully updated!") }
             .addOnFailureListener { e -> Log.w("Error updating todo item", e) }
+    }
+
+    fun addToDoItem(toDo: String, checked: Boolean, cosplay: CosplayWithId) {
+        var newTodo: String
+        if(checked) {
+            newTodo = "1" + toDo
+        } else {
+            newTodo = "0" + toDo
+        }
+
+        var newTodos: MutableList<String>
+                = cosplay.cosplay.toDo.toMutableList()
+        newTodos.add(newTodo)
+
+        FirebaseFirestore.getInstance().collection(COLLECTION_COSPLAYS).document(cosplay.cosId)
+            .update(mapOf(
+                "toDo" to newTodos))
+            .addOnSuccessListener { Log.d("tag", "todo item successfully added!") }
+            .addOnFailureListener { e -> Log.w("Error adding todo item", e) }
     }
 
     fun getCosplayById(id: String, cosplays: List<CosplayWithId>): Cosplay {

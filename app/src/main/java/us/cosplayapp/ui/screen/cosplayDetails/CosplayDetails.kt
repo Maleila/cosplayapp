@@ -14,8 +14,11 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.CutCornerShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AddCircleOutline
 import androidx.compose.material.icons.filled.Build
+import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -27,16 +30,26 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldColors
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -99,7 +112,7 @@ fun CosplayDetails(
     }
 }
 
-@OptIn(ExperimentalLayoutApi::class)
+@OptIn(ExperimentalLayoutApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun cosplayDetails(cosplay: CosplayWithId,
                    onEditCosplay: (Cosplay) -> Unit = {},
@@ -114,8 +127,15 @@ fun cosplayDetails(cosplay: CosplayWithId,
         Color.Green
     }
 
-    var isChecked by rememberSaveable {
-        mutableStateOf(cosplay.cosplay.toDo)
+    var showAddTodo by rememberSaveable {
+        mutableStateOf(false)
+    }
+    var newTodo by rememberSaveable {
+        mutableStateOf("")
+    }
+
+    var newCheck by rememberSaveable {
+        mutableStateOf(false)
     }
 
     Row(modifier = Modifier.fillMaxWidth(),
@@ -132,7 +152,7 @@ fun cosplayDetails(cosplay: CosplayWithId,
             modifier = Modifier.clickable {
                 onEditCosplay(cosplay.cosplay)
             },
-            tint = Color.Blue
+            tint = Color.White
         )
     }
     Spacer(modifier = Modifier.fillMaxHeight(0.02f))
@@ -165,22 +185,110 @@ fun cosplayDetails(cosplay: CosplayWithId,
         modifier = Modifier.padding(10.dp)
     )
     Column {
+        Text(
+            text = "To Do",
+            style = MaterialTheme.typography.bodyLarge,
+            modifier = Modifier.padding(10.dp)
+        )
         cosplay.cosplay.toDo.forEachIndexed { index, todo ->
-            Row() {
-                Checkbox(
-                    checked = todo.get(0) == '1',
-                    onCheckedChange = { cosplayDetailsViewModel.changeToDoStatus(cosplay, todo.substring(1), it, index)}
-                    //onCheckedChange = {}
-                )
-                Text(
-                    text = todo.substring(1),
-                    style = MaterialTheme.typography.bodyMedium,
-                    modifier = Modifier.padding(10.dp)
-                )
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                if(todo != "") {
+                    Checkbox(
+                        checked = todo.get(0) == '1',
+                        onCheckedChange = {
+                            cosplayDetailsViewModel.changeToDoStatus(
+                                cosplay,
+                                todo.substring(1),
+                                it,
+                                index)}
+                    )
+                    Text(
+                        text = todo.substring(1),
+                        style = MaterialTheme.typography.bodyMedium,
+                        modifier = Modifier.padding(10.dp)
+                    )
+                }
+
             }
         }
+        if(showAddTodo) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Checkbox(
+                    checked = newCheck,
+                    onCheckedChange = {
+                        newCheck = it}
+                )
+//                BasicTextField(
+//                    value = newTodo,
+//                    onValueChange = {
+//                        newTodo = it
+//                    },
+//                    modifier = Modifier.padding(10.dp),
+//                    cursorBrush = SolidColor(Color.White),
+//                    textStyle = TextStyle(Color.White),
+//                    decorationBox = { innerTextField ->
+//                        innerTextField() // No decoration, just the text and cursor
+//                    })
+                transparentTextfield(value = newTodo,
+                    onValueChange = {
+                        newTodo = it
+                })
+                Icon(
+                    imageVector = Icons.Filled.CheckCircle,
+                    contentDescription = "set new to-do item",
+                    modifier = Modifier
+                        .padding(12.dp)
+                        .clickable {
+                            cosplayDetailsViewModel.addToDoItem(newTodo, newCheck, cosplay)
+                            showAddTodo = false
+                            newTodo = ""
+                            newCheck = false
+                        },
+                    tint = Color.White
+                )
+            }
+
+        }
+        Icon(
+            imageVector = Icons.Filled.AddCircleOutline,
+            contentDescription = "add to-do item",
+            modifier = Modifier
+                .padding(12.dp)
+                .clickable {
+                    showAddTodo = true
+                },
+            tint = Color.White
+        )
+    }
+}
+
+@Composable
+fun transparentTextfield(
+    value: String,
+    onValueChange: (String) -> Unit
+) {
+
+    // Create a FocusRequester
+    val focusRequester = remember { FocusRequester() }
+    val focusManager = LocalFocusManager.current
+
+    LaunchedEffect(Unit) {
+        // Request focus as soon as the composable is visible
+        focusRequester.requestFocus()
     }
 
+    BasicTextField(
+        value = value,
+        onValueChange = onValueChange,
+        modifier = Modifier
+            .padding(10.dp)
+            .focusRequester(focusRequester),
+        cursorBrush = SolidColor(Color.White),
+        textStyle = TextStyle(Color.White),
+        decorationBox = { innerTextField ->
+            innerTextField() // No decoration, just the text and cursor
+        }
+    )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
