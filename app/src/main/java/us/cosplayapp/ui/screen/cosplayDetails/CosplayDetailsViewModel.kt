@@ -42,15 +42,28 @@ class CosplayDetailsViewModel : ViewModel(
         }
     }
 
-//    fun getCosplayByName(character: String, cosplays: List<CosplayWithId>): Cosplay {
-//        for(c in cosplays) {
-//            if(c.cosplay.character == character) {
-//                return c.cosplay
-//            }
-//        }
-//
-//        return Cosplay("", "", "","", "", "", "")
-//    }
+    fun changeToDoStatus(cosplay: CosplayWithId, toDo: String, checked: Boolean, index: Int) {
+        var newTodo: String
+        if(checked) {
+            newTodo = "1" + toDo
+        } else {
+            newTodo = "0" + toDo
+        }
+
+        var newTodos: MutableList<String>
+                = cosplay.cosplay.toDo.toMutableList()
+        newTodos[index] = newTodo
+
+        //won't work bc this is trying to update ALL the todo's to this one new todo
+        //try sending it w the index in the list? not 100% sure how I would get that tho...
+        Log.d("TODO", "updating to " + newTodo)
+
+        FirebaseFirestore.getInstance().collection(COLLECTION_COSPLAYS).document(cosplay.cosId)
+            .update(mapOf(
+                "toDo" to newTodos))
+            .addOnSuccessListener { Log.d("tag", "todo item successfully updated!") }
+            .addOnFailureListener { e -> Log.w("Error updating todo item", e) }
+    }
 
     fun getCosplayById(id: String, cosplays: List<CosplayWithId>): Cosplay {
         for(c in cosplays) {
@@ -59,26 +72,11 @@ class CosplayDetailsViewModel : ViewModel(
             }
         }
 
-        return Cosplay("", "", "","", "", "", "")
+        return Cosplay("", "", "","", "", "", "", listOf(""))
     }
 
     fun editCosplay(newCosplay: Cosplay, characterId: String, cosplays: List<CosplayWithId>) {
         //TODO not sure this is the best way to do it
-
-//        Log.d("COSPLAY", character)
-//        FirebaseFirestore.getInstance().collection(COLLECTION_COSPLAYS)
-//            .whereEqualTo("character", newCosplay.character)
-//            .get()
-//            .addOnSuccessListener { documents ->
-//                for (document in documents) {
-//                    Log.d("COSPLAY", "Found the character!")
-//                    Log.d("COSPLAY", "${document.id} => ${document.data}")
-//                    cosRef = document.id
-//                }
-//            }
-//            .addOnFailureListener { exception ->
-//                Log.w("COSPLAY", "Error getting documents: ", exception)
-//            }
 
         Log.d("COSPLAY", characterId)
 
@@ -88,7 +86,8 @@ class CosplayDetailsViewModel : ViewModel(
                 "media" to newCosplay.media,
                 "mediaType" to newCosplay.mediaType,
                 "progress" to newCosplay.progress,
-                "complexity" to newCosplay.complexity))
+                "complexity" to newCosplay.complexity,
+                "notes" to newCosplay.notes))
             .addOnSuccessListener { Log.d("tag", "DocumentSnapshot successfully updated!") }
             .addOnFailureListener { e -> Log.w("Error updating document", e) }
     }

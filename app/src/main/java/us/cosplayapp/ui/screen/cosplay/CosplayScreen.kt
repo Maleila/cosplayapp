@@ -85,7 +85,8 @@ fun CosplayScreen(
                     .padding(40.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Text(text = "Cosplays")
+                Text(text = "Cosplays",
+                    style = MaterialTheme.typography.titleLarge)
             }
         },
         floatingActionButton = {
@@ -166,6 +167,21 @@ fun CosplayCard(
     cosplay: Cosplay,
     onCardClicked: () -> Unit = {}
 ) {
+
+//    val charTextModifier = Modifier
+//        .then(if(cosplay.progress == "Not started") Modifier.background(Color.Red)
+//        else if(cosplay.progress == "In Progress") Modifier.background(Color.Yellow)
+//        else Modifier.background((Color.Green)))
+
+    var charTextColor: Color
+    charTextColor = if(cosplay.progress == "Not started") {
+        Color.Red
+    } else if(cosplay.progress == "In Progress") {
+        Color(0xFFFF9800)
+    } else {
+        Color.Green
+    }
+
     Card(
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surfaceVariant
@@ -193,7 +209,8 @@ fun CosplayCard(
                     modifier = Modifier
                         .weight(1f)
                 ) {
-                    Text(text = cosplay.character)
+                    Text(text = cosplay.character,
+                        color = charTextColor)
                     Text(text = cosplay.media)
                     Text(text = cosplay.complexity)
                 }

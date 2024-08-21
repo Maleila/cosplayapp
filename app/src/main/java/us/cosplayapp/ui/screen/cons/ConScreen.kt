@@ -76,7 +76,8 @@ fun ConScreen(
                     .padding(40.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Text(text = "Cons")
+                Text(text = "Cons",
+                    style = MaterialTheme.typography.titleLarge)
             }
         },
         floatingActionButton = {

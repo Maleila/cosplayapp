@@ -7,7 +7,8 @@ data class Cosplay(
     var mediaType: String = "",
     var progress: String = "",
     var complexity: String = "",
-    var notes: String = ""
+    var notes: String = "",
+    var toDo: List<String> = listOf("")
 )
 
 data class CosplayWithId(

@@ -21,6 +21,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -69,13 +70,15 @@ fun CosplayDetails(
             Text(text = "loading")
         } else {
             cosplayDetails(
-                cosplay = cosplayDetailsViewModel.getCosplayById(
-                    id,
-                    (cosplayListState.value as CosplayDetailsViewModel.CosplayDetailsUIState.Success).cosList
-                ),
+                cosplay = CosplayWithId(id,
+                    cosplayDetailsViewModel.getCosplayById(
+                        id,
+                        (cosplayListState.value as CosplayDetailsViewModel.CosplayDetailsUIState.Success).cosList
+                    )),
                 onEditCosplay = { cosplay ->
                     showEditDialog = true
-                }
+                },
+                cosplayDetailsViewModel
             )
 
             if(showEditDialog) {
@@ -98,21 +101,36 @@ fun CosplayDetails(
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-fun cosplayDetails(cosplay: Cosplay,
-                   onEditCosplay: (Cosplay) -> Unit = {})
+fun cosplayDetails(cosplay: CosplayWithId,
+                   onEditCosplay: (Cosplay) -> Unit = {},
+                   cosplayDetailsViewModel: CosplayDetailsViewModel)
 {
+    var charTextColor: Color
+    charTextColor = if(cosplay.cosplay.progress == "Not started") {
+        Color.Red
+    } else if(cosplay.cosplay.progress == "In Progress") {
+        Color(0xFFFF9800)
+    } else {
+        Color.Green
+    }
+
+    var isChecked by rememberSaveable {
+        mutableStateOf(cosplay.cosplay.toDo)
+    }
+
     Row(modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.Center) {
         Text(
-            text = cosplay.character,
+            text = cosplay.cosplay.character,
             style = MaterialTheme.typography.titleLarge,
-            modifier = Modifier.padding(10.dp)
+            modifier = Modifier.padding(10.dp),
+            color = charTextColor
         )
         Icon(
             imageVector = Icons.Filled.Settings,
             contentDescription = "edit",
             modifier = Modifier.clickable {
-                onEditCosplay(cosplay)
+                onEditCosplay(cosplay.cosplay)
             },
             tint = Color.Blue
         )
@@ -122,7 +140,7 @@ fun cosplayDetails(cosplay: Cosplay,
         Row(modifier = Modifier.fillMaxWidth(0.7f),
             horizontalArrangement = Arrangement.Start) {
             Text(
-                text = cosplay.media + " (" + cosplay.mediaType + ")",
+                text = cosplay.cosplay.media + " (" + cosplay.cosplay.mediaType + ")",
                 style = MaterialTheme.typography.bodyLarge,
                 modifier = Modifier.padding(10.dp)
             )
@@ -130,23 +148,39 @@ fun cosplayDetails(cosplay: Cosplay,
         Row(modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.End) {
             Text(
-                text = cosplay.progress,
+                text = cosplay.cosplay.progress,
                 style = MaterialTheme.typography.bodyMedium,
                 modifier = Modifier.padding(10.dp)
             )
         }
     }
     Text(
-        text = cosplay.complexity,
+        text = cosplay.cosplay.complexity,
         style = MaterialTheme.typography.bodyMedium,
         modifier = Modifier.padding(10.dp)
     )
-
     Text(
-        text = cosplay.notes,
+        text = cosplay.cosplay.notes,
         style = MaterialTheme.typography.bodyMedium,
         modifier = Modifier.padding(10.dp)
     )
+    Column {
+        cosplay.cosplay.toDo.forEachIndexed { index, todo ->
+            Row() {
+                Checkbox(
+                    checked = todo.get(0) == '1',
+                    onCheckedChange = { cosplayDetailsViewModel.changeToDoStatus(cosplay, todo.substring(1), it, index)}
+                    //onCheckedChange = {}
+                )
+                Text(
+                    text = todo.substring(1),
+                    style = MaterialTheme.typography.bodyMedium,
+                    modifier = Modifier.padding(10.dp)
+                )
+            }
+        }
+    }
+
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
