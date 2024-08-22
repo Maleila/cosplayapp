@@ -82,9 +82,20 @@ class CosplayDetailsViewModel : ViewModel(
             .addOnFailureListener { e -> Log.w("Error adding todo item", e) }
     }
 
+    //TODO doesn't seem to be recomposing/grabbing new todo list after delete
     fun deleteToDo(cosplay: CosplayWithId, index: Int) {
         var newTodos = cosplay.cosplay.toDo.toMutableList()
-        newTodos.removeAt(index)
+//        newTodos.forEach {
+//            Log.d("DELETE", it)
+//        }
+//
+//        Log.d("DELETE", "deleting item #" + index)
+//        Log.d("DELETE", newTodos.removeAt(index))
+//
+//        Log.d("DELETE", "new list:")
+//        newTodos.forEach {
+//            Log.d("DELETE", it)
+//        }
 
         FirebaseFirestore.getInstance().collection(COLLECTION_COSPLAYS).document(cosplay.cosId)
             .update(mapOf(

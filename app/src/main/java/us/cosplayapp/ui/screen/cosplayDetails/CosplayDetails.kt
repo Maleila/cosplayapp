@@ -180,11 +180,18 @@ fun cosplayDetails(cosplay: CosplayWithId,
         style = MaterialTheme.typography.bodyMedium,
         modifier = Modifier.padding(10.dp)
     )
+    Spacer(modifier = Modifier.fillMaxHeight(0.02f))
+    Text(
+        text = "Notes",
+        style = MaterialTheme.typography.bodyLarge,
+        modifier = Modifier.padding(10.dp)
+    )
     Text(
         text = cosplay.cosplay.notes,
         style = MaterialTheme.typography.bodyMedium,
         modifier = Modifier.padding(10.dp)
     )
+    Spacer(modifier = Modifier.fillMaxHeight(0.02f))
     Column {
         Text(
             text = "To Do",
@@ -192,7 +199,8 @@ fun cosplayDetails(cosplay: CosplayWithId,
             modifier = Modifier.padding(10.dp)
         )
         cosplay.cosplay.toDo.forEachIndexed { index, todo ->
-            Row(verticalAlignment = Alignment.CenterVertically) {
+            Row(verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.fillMaxWidth()) {
                 if(todo != "") {
                     var editedTodo by rememberSaveable {
                         mutableStateOf(todo.substring(1))
@@ -200,53 +208,66 @@ fun cosplayDetails(cosplay: CosplayWithId,
                     var itemModifiable by rememberSaveable {
                         mutableStateOf(false)
                     }
-
-                    Checkbox(
-                        checked = todo.get(0) == '1',
-                        onCheckedChange = {
-                            cosplayDetailsViewModel.changeToDoStatus(
-                                cosplay,
-                                todo.substring(1),
-                                it,
-                                index)
-                        }
-                    )
-                    BasicTextField(
-                        value = editedTodo,
-                        onValueChange = {
-                            editedTodo = it
-                        },
-                        enabled = itemModifiable,
-                        modifier = Modifier
-                            .padding(10.dp)
-                            .clickable {
-                                itemModifiable = true
-                                //should also focus so you don't have to click twice
+                    Row(modifier = Modifier.fillMaxWidth(0.8f),
+                        horizontalArrangement = Arrangement.Start,
+                        verticalAlignment = Alignment.CenterVertically) {
+                        Checkbox(
+                            checked = todo.get(0) == '1',
+                            onCheckedChange = {
+                                cosplayDetailsViewModel.changeToDoStatus(
+                                    cosplay,
+                                    todo.substring(1),
+                                    it,
+                                    index
+                                )
+                            }
+                        )
+                        BasicTextField(
+                            value = editedTodo,
+                            onValueChange = {
+                                editedTodo = it
                             },
-                        cursorBrush = SolidColor(Color.White),
-                        textStyle = TextStyle(Color.White),
-                        decorationBox = { innerTextField ->
-                            innerTextField() // No decoration, just the text and cursor
-                    })
-                    Icon(
-                        imageVector = Icons.Filled.Delete,
-                        contentDescription = "delete to-do item",
-                        modifier = Modifier
-                            .padding(12.dp)
-                            .clickable {
-                                cosplayDetailsViewModel.deleteToDo(cosplay, index)
-                            },
-                        tint = Color.White
-                    )
-                    if(itemModifiable) {
-                        Icon(
-                            imageVector = Icons.Filled.CheckCircle,
-                            contentDescription = "edit to-do item",
+                            enabled = itemModifiable,
                             modifier = Modifier
-                                .padding(12.dp)
+                                .padding(5.dp)
                                 .clickable {
-                                    cosplayDetailsViewModel.changeToDoStatus(cosplay, editedTodo, todo.get(0) == '1', index)
-                                    itemModifiable = false
+                                    itemModifiable = true
+                                    //should also focus so you don't have to click twice
+                                },
+                            cursorBrush = SolidColor(Color.White),
+                            textStyle = TextStyle(Color.White),
+                            decorationBox = { innerTextField ->
+                                innerTextField() // No decoration, just the text and cursor
+                            })
+                    }
+                    Row(modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.End,
+                        verticalAlignment = Alignment.CenterVertically) {
+                        if (itemModifiable) {
+                            Icon(
+                                imageVector = Icons.Filled.CheckCircle,
+                                contentDescription = "edit to-do item",
+                                modifier = Modifier
+                                    .padding(5.dp)
+                                    .clickable {
+                                        cosplayDetailsViewModel.changeToDoStatus(
+                                            cosplay,
+                                            editedTodo,
+                                            todo.get(0) == '1',
+                                            index
+                                        )
+                                        itemModifiable = false
+                                    },
+                                tint = Color.White
+                            )
+                        }
+                        Icon(
+                            imageVector = Icons.Filled.Delete,
+                            contentDescription = "delete to-do item",
+                            modifier = Modifier
+                                .padding(10.dp)
+                                .clickable {
+                                    cosplayDetailsViewModel.deleteToDo(cosplay, index)
                                 },
                             tint = Color.White
                         )
@@ -255,29 +276,40 @@ fun cosplayDetails(cosplay: CosplayWithId,
             }
         }
         if(showAddTodo) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Checkbox(
-                    checked = newCheck,
-                    onCheckedChange = {
-                        newCheck = it}
-                )
-                transparentTextfield(value = newTodo,
-                    onValueChange = {
-                        newTodo = it
-                })
-                Icon(
-                    imageVector = Icons.Filled.CheckCircle,
-                    contentDescription = "set new to-do item",
-                    modifier = Modifier
-                        .padding(12.dp)
-                        .clickable {
-                            cosplayDetailsViewModel.addToDoItem(newTodo, newCheck, cosplay)
-                            showAddTodo = false
-                            newTodo = ""
-                            newCheck = false
-                        },
-                    tint = Color.White
-                )
+            Row(modifier = Modifier.fillMaxWidth()) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.Start
+                ) {
+                    Checkbox(
+                        checked = newCheck,
+                        onCheckedChange = {
+                            newCheck = it
+                        }
+                    )
+                    transparentTextfield(value = newTodo,
+                        onValueChange = {
+                            newTodo = it
+                        })
+                    Row(modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.End,
+                        verticalAlignment = Alignment.CenterVertically) {
+                        Icon(
+                            imageVector = Icons.Filled.CheckCircle,
+                            contentDescription = "set new to-do item",
+                            modifier = Modifier
+                                .padding(12.dp)
+                                .clickable {
+                                    cosplayDetailsViewModel.addToDoItem(newTodo, newCheck, cosplay)
+                                    showAddTodo = false
+                                    newTodo = ""
+                                    newCheck = false
+                                },
+                            tint = Color.White
+                        )
+                    }
+                }
             }
 
         }
@@ -313,7 +345,7 @@ fun transparentTextfield(
         value = value,
         onValueChange = onValueChange,
         modifier = Modifier
-            .padding(10.dp)
+            .padding(5.dp)
             .focusRequester(focusRequester),
         cursorBrush = SolidColor(Color.White),
         textStyle = TextStyle(Color.White),
