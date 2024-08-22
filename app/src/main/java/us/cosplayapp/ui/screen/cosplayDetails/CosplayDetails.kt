@@ -119,24 +119,12 @@ fun cosplayDetails(cosplay: CosplayWithId,
                    onEditCosplay: (Cosplay) -> Unit = {},
                    cosplayDetailsViewModel: CosplayDetailsViewModel)
 {
-    var charTextColor: Color
-    charTextColor = if(cosplay.cosplay.progress == "Not started") {
+    var charTextColor: Color = if(cosplay.cosplay.progress == "Not started") {
         Color.Red
     } else if(cosplay.cosplay.progress == "In Progress") {
         Color(0xFFFF9800)
     } else {
         Color.Green
-    }
-
-    var showAddTodo by rememberSaveable {
-        mutableStateOf(false)
-    }
-    var newTodo by rememberSaveable {
-        mutableStateOf("")
-    }
-
-    var newCheck by rememberSaveable {
-        mutableStateOf(false)
     }
 
     Row(modifier = Modifier.fillMaxWidth(),
@@ -192,6 +180,43 @@ fun cosplayDetails(cosplay: CosplayWithId,
         modifier = Modifier.padding(10.dp)
     )
     Spacer(modifier = Modifier.fillMaxHeight(0.02f))
+
+    CheckList(cosplay,
+              onEditItem = {cosplay, editedTodo, checked, index ->
+                  cosplayDetailsViewModel.changeToDoStatus(
+                      cosplay,
+                      editedTodo,
+                      checked,
+                      index
+                  )
+              },
+              onAddItem = { newTodo, newCheck, cosplay ->
+                  cosplayDetailsViewModel.addToDoItem(newTodo, newCheck, cosplay)
+              },
+              onDeleteItem = { cosplay, index ->
+                cosplayDetailsViewModel.deleteToDo(cosplay, index)
+                }
+        )
+
+}
+
+@Composable
+fun CheckList(cosplay: CosplayWithId,
+              onEditItem: (CosplayWithId, String, Boolean, Int) -> Unit,
+              onAddItem: (String, Boolean, CosplayWithId) -> Unit,
+              onDeleteItem: (CosplayWithId, Int) -> Unit) {
+
+    var showAddTodo by rememberSaveable {
+        mutableStateOf(false)
+    }
+    var newTodo by rememberSaveable {
+        mutableStateOf("")
+    }
+
+    var newCheck by rememberSaveable {
+        mutableStateOf(false)
+    }
+
     Column {
         Text(
             text = "To Do",
@@ -214,31 +239,50 @@ fun cosplayDetails(cosplay: CosplayWithId,
                         Checkbox(
                             checked = todo.get(0) == '1',
                             onCheckedChange = {
-                                cosplayDetailsViewModel.changeToDoStatus(
-                                    cosplay,
-                                    todo.substring(1),
-                                    it,
-                                    index
-                                )
+                                onEditItem(cosplay, todo.substring(1), it, index)
                             }
                         )
-                        BasicTextField(
-                            value = editedTodo,
-                            onValueChange = {
-                                editedTodo = it
-                            },
-                            enabled = itemModifiable,
-                            modifier = Modifier
-                                .padding(5.dp)
-                                .clickable {
-                                    itemModifiable = true
-                                    //should also focus so you don't have to click twice
+                        //can't use the same textfield bc one needs to be the actual to-do
+                        //so it updates w the database
+                        //and one needs to be a local var that the user can modify
+                        //unless I can get the local var to listen for changes to the to-do...
+                        if(!itemModifiable) {
+                            BasicTextField(
+                                value = todo.substring(1),
+                                onValueChange = {
+                                    editedTodo = it
                                 },
-                            cursorBrush = SolidColor(Color.White),
-                            textStyle = TextStyle(Color.White),
-                            decorationBox = { innerTextField ->
-                                innerTextField() // No decoration, just the text and cursor
-                            })
+                                enabled = false,
+                                modifier = Modifier
+                                    .padding(5.dp)
+                                    .clickable {
+                                        itemModifiable = true
+                                        editedTodo = todo.substring(1)
+                                        //should also focus so you don't have to click twice
+                                    },
+                                textStyle = TextStyle(Color.White),
+                                decorationBox = { innerTextField ->
+                                    innerTextField() // No decoration, just the text and cursor
+                                })
+                        }
+                        if(itemModifiable) {
+                            BasicTextField(
+                                value = editedTodo,
+                                onValueChange = {
+                                    editedTodo = it
+                                },
+                                modifier = Modifier
+                                    .padding(5.dp)
+                                    .clickable {
+                                        itemModifiable = true
+                                        //should also focus so you don't have to click twice
+                                    },
+                                cursorBrush = SolidColor(Color.White),
+                                textStyle = TextStyle(Color.White),
+                                decorationBox = { innerTextField ->
+                                    innerTextField() // No decoration, just the text and cursor
+                                })
+                        }
                     }
                     Row(modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.End,
@@ -246,16 +290,11 @@ fun cosplayDetails(cosplay: CosplayWithId,
                         if (itemModifiable) {
                             Icon(
                                 imageVector = Icons.Filled.CheckCircle,
-                                contentDescription = "edit to-do item",
+                                contentDescription = "edit list item",
                                 modifier = Modifier
                                     .padding(5.dp)
                                     .clickable {
-                                        cosplayDetailsViewModel.changeToDoStatus(
-                                            cosplay,
-                                            editedTodo,
-                                            todo.get(0) == '1',
-                                            index
-                                        )
+                                        onEditItem(cosplay, editedTodo, todo.get(0) == '1', index)
                                         itemModifiable = false
                                     },
                                 tint = Color.White
@@ -263,11 +302,11 @@ fun cosplayDetails(cosplay: CosplayWithId,
                         }
                         Icon(
                             imageVector = Icons.Filled.Delete,
-                            contentDescription = "delete to-do item",
+                            contentDescription = "delete list item",
                             modifier = Modifier
                                 .padding(10.dp)
                                 .clickable {
-                                    cosplayDetailsViewModel.deleteToDo(cosplay, index)
+                                    onDeleteItem(cosplay, index)
                                 },
                             tint = Color.White
                         )
@@ -301,7 +340,7 @@ fun cosplayDetails(cosplay: CosplayWithId,
                             modifier = Modifier
                                 .padding(12.dp)
                                 .clickable {
-                                    cosplayDetailsViewModel.addToDoItem(newTodo, newCheck, cosplay)
+                                    onAddItem(newTodo, newCheck, cosplay)
                                     showAddTodo = false
                                     newTodo = ""
                                     newCheck = false
