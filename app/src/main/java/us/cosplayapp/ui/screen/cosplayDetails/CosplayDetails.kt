@@ -19,6 +19,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AddCircleOutline
 import androidx.compose.material.icons.filled.Build
 import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -207,7 +208,8 @@ fun cosplayDetails(cosplay: CosplayWithId,
                                 cosplay,
                                 todo.substring(1),
                                 it,
-                                index)}
+                                index)
+                        }
                     )
                     BasicTextField(
                         value = editedTodo,
@@ -226,6 +228,16 @@ fun cosplayDetails(cosplay: CosplayWithId,
                         decorationBox = { innerTextField ->
                             innerTextField() // No decoration, just the text and cursor
                     })
+                    Icon(
+                        imageVector = Icons.Filled.Delete,
+                        contentDescription = "delete to-do item",
+                        modifier = Modifier
+                            .padding(12.dp)
+                            .clickable {
+                                cosplayDetailsViewModel.deleteToDo(cosplay, index)
+                            },
+                        tint = Color.White
+                    )
                     if(itemModifiable) {
                         Icon(
                             imageVector = Icons.Filled.CheckCircle,

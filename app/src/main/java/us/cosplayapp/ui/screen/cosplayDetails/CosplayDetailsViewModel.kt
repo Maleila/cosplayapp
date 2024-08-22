@@ -82,8 +82,15 @@ class CosplayDetailsViewModel : ViewModel(
             .addOnFailureListener { e -> Log.w("Error adding todo item", e) }
     }
 
-    fun editToDo(cosplay: CosplayWithId, checked: Boolean, toDo: String, index: Int) {
-        //actually maybe this can be same as other one...
+    fun deleteToDo(cosplay: CosplayWithId, index: Int) {
+        var newTodos = cosplay.cosplay.toDo.toMutableList()
+        newTodos.removeAt(index)
+
+        FirebaseFirestore.getInstance().collection(COLLECTION_COSPLAYS).document(cosplay.cosId)
+            .update(mapOf(
+                "toDo" to newTodos))
+            .addOnSuccessListener { Log.d("DELETE", "todo item successfully removed!") }
+            .addOnFailureListener { e -> Log.w("Error removing todo item", e) }
     }
 
     fun getCosplayById(id: String, cosplays: List<CosplayWithId>): Cosplay {
