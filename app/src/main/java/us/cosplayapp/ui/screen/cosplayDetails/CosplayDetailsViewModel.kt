@@ -82,6 +82,10 @@ class CosplayDetailsViewModel : ViewModel(
             .addOnFailureListener { e -> Log.w("Error adding todo item", e) }
     }
 
+    fun editToDo(cosplay: CosplayWithId, checked: Boolean, toDo: String, index: Int) {
+        //actually maybe this can be same as other one...
+    }
+
     fun getCosplayById(id: String, cosplays: List<CosplayWithId>): Cosplay {
         for(c in cosplays) {
             if(c.cosId == id) {

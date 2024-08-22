@@ -193,6 +193,13 @@ fun cosplayDetails(cosplay: CosplayWithId,
         cosplay.cosplay.toDo.forEachIndexed { index, todo ->
             Row(verticalAlignment = Alignment.CenterVertically) {
                 if(todo != "") {
+                    var editedTodo by rememberSaveable {
+                        mutableStateOf(todo.substring(1))
+                    }
+                    var itemModifiable by rememberSaveable {
+                        mutableStateOf(false)
+                    }
+
                     Checkbox(
                         checked = todo.get(0) == '1',
                         onCheckedChange = {
@@ -202,13 +209,37 @@ fun cosplayDetails(cosplay: CosplayWithId,
                                 it,
                                 index)}
                     )
-                    Text(
-                        text = todo.substring(1),
-                        style = MaterialTheme.typography.bodyMedium,
-                        modifier = Modifier.padding(10.dp)
-                    )
+                    BasicTextField(
+                        value = editedTodo,
+                        onValueChange = {
+                            editedTodo = it
+                        },
+                        enabled = itemModifiable,
+                        modifier = Modifier
+                            .padding(10.dp)
+                            .clickable {
+                                itemModifiable = true
+                                //should also focus so you don't have to click twice
+                            },
+                        cursorBrush = SolidColor(Color.White),
+                        textStyle = TextStyle(Color.White),
+                        decorationBox = { innerTextField ->
+                            innerTextField() // No decoration, just the text and cursor
+                    })
+                    if(itemModifiable) {
+                        Icon(
+                            imageVector = Icons.Filled.CheckCircle,
+                            contentDescription = "edit to-do item",
+                            modifier = Modifier
+                                .padding(12.dp)
+                                .clickable {
+                                    cosplayDetailsViewModel.changeToDoStatus(cosplay, editedTodo, todo.get(0) == '1', index)
+                                    itemModifiable = false
+                                },
+                            tint = Color.White
+                        )
+                    }
                 }
-
             }
         }
         if(showAddTodo) {
@@ -218,17 +249,6 @@ fun cosplayDetails(cosplay: CosplayWithId,
                     onCheckedChange = {
                         newCheck = it}
                 )
-//                BasicTextField(
-//                    value = newTodo,
-//                    onValueChange = {
-//                        newTodo = it
-//                    },
-//                    modifier = Modifier.padding(10.dp),
-//                    cursorBrush = SolidColor(Color.White),
-//                    textStyle = TextStyle(Color.White),
-//                    decorationBox = { innerTextField ->
-//                        innerTextField() // No decoration, just the text and cursor
-//                    })
                 transparentTextfield(value = newTodo,
                     onValueChange = {
                         newTodo = it
