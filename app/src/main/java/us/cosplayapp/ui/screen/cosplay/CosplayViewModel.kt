@@ -106,6 +106,8 @@ class CosplayViewModel: ViewModel() {
             q = q.whereEqualTo("progress", progressParam)
         }
 
+        q = q.orderBy("progress")
+
         Log.d("FILTER", "$mediaTypeParam, $complexityParam, $progressParam")
 
         q.get()

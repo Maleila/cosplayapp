@@ -9,7 +9,8 @@ data class Cosplay(
     var complexity: String = "",
     var notes: String = "",
     var toDo: List<String> = listOf(""),
-    var checklist: List<String> = listOf("")
+    var checklist: List<String> = listOf(""),
+    var consList: List<String> = listOf("")
 )
 
 data class CosplayWithId(

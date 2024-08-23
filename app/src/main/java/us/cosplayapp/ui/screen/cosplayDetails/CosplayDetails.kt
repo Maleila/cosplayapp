@@ -44,6 +44,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.viewmodel.compose.viewModel
+import us.cosplayapp.Con.ConWithId
 import us.cosplayapp.Cosplay.Cosplay
 import us.cosplayapp.Cosplay.CosplayWithId
 import us.cosplayapp.ui.screen.cosplay.Dropdown
@@ -59,9 +60,16 @@ fun CosplayDetails(
         initial = CosplayDetailsViewModel.CosplayDetailsUIState.Init
     )
 
+    val conListState = cosplayDetailsViewModel.conList().collectAsState(
+        initial = CosplayDetailsViewModel.ConUIState.Init )
+
     var showEditDialog by rememberSaveable {
-    mutableStateOf(false)
-}
+        mutableStateOf(false)
+    }
+
+    var showAddConDialogue by rememberSaveable {
+        mutableStateOf(false)
+    }
 
     Column(modifier = Modifier
         .fillMaxSize()
@@ -81,6 +89,9 @@ fun CosplayDetails(
                 onEditCosplay = { cosplay ->
                     showEditDialog = true
                 },
+                onAddCon = {
+                    showAddConDialogue = true
+                },
                 cosplayDetailsViewModel
             )
 
@@ -96,6 +107,19 @@ fun CosplayDetails(
                     showEditDialog = false
                 }
             }
+            if(showAddConDialogue) {
+                AddConDialogue(
+                    cosplay = CosplayWithId(id,
+                        cosplayDetailsViewModel.getCosplayById(
+                            id,
+                            (cosplayListState.value as CosplayDetailsViewModel.CosplayDetailsUIState.Success).cosList
+                        )),
+                    (conListState.value as CosplayDetailsViewModel.ConUIState.Success).conList,
+                    cosplayDetailsViewModel = cosplayDetailsViewModel,
+                    {
+                        showAddConDialogue = false
+                    })
+            }
         }
     }
 }
@@ -104,6 +128,7 @@ fun CosplayDetails(
 @Composable
 fun CosplayDetails(cosplay: CosplayWithId,
                    onEditCosplay: (Cosplay) -> Unit = {},
+                   onAddCon: () -> Unit = {},
                    cosplayDetailsViewModel: CosplayDetailsViewModel)
 {
     var charTextColor: Color = when (cosplay.cosplay.progress) {
@@ -170,6 +195,28 @@ fun CosplayDetails(cosplay: CosplayWithId,
         style = MaterialTheme.typography.bodyMedium,
         modifier = Modifier.padding(10.dp)
     )
+    Text(
+        text = "Cons Appearances",
+        style = MaterialTheme.typography.bodyLarge,
+        modifier = Modifier.padding(10.dp)
+    )
+    Row() {
+        cosplay.cosplay.consList.forEach { con ->
+            Button(onClick = { /*TODO*/ }) {
+                Text(text = con)
+            }
+        }
+    }
+    Icon(
+        imageVector = Icons.Filled.AddCircleOutline,
+        contentDescription = "add con",
+        modifier = Modifier
+            .padding(12.dp)
+            .clickable {
+                onAddCon()
+            },
+        tint = Color.White
+    )
     Spacer(modifier = Modifier.fillMaxHeight(0.02f))
     Text(
         text = "To Do",
@@ -216,8 +263,6 @@ fun CosplayDetails(cosplay: CosplayWithId,
             cosplayDetailsViewModel.deleteChecklistItem(cosplay, index)
         }
     )
-
-
 }
 
 @Composable
@@ -410,11 +455,56 @@ fun TransparentTextField(
     )
 }
 
+@Composable
+fun AddConDialogue(
+    cosplay: CosplayWithId,
+    cons: List<ConWithId>,
+    cosplayDetailsViewModel: CosplayDetailsViewModel,
+    onDialogDismiss: () -> Unit = {}
+) {
+    Dialog(onDismissRequest = {
+        onDialogDismiss
+    }) {
+        var conList by rememberSaveable {
+            mutableStateOf(cosplayDetailsViewModel.getConsList(cons))
+        }
+
+        var con by rememberSaveable {
+            mutableStateOf(conList[0])
+        }
+        Column(
+            Modifier
+                .background(
+                    color = MaterialTheme.colorScheme.secondaryContainer,
+                    shape = MaterialTheme.shapes.medium
+                )
+                .padding(10.dp)
+        ) {
+            Text(text = "Con", modifier = Modifier.padding(horizontal = 10.dp))
+            Dropdown(
+                list = conList,
+                preselected = conList[0],
+                onSelectionChanged = {
+                    con = it
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(10.dp))
+            Button(onClick = {
+                cosplayDetailsViewModel.addCon(con, cosplay)
+                onDialogDismiss()
+            }) {
+                Text(text = "Add")
+            }
+        }
+    }
+}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EditDialogue(
     cosplay: Cosplay,
-    characterRef: String,
+    characterRef: String, //TODO should change this to just passing the cosplaywithid
     cosplayDetailsViewModel: CosplayDetailsViewModel,
     onDialogDismiss: () -> Unit = {}
 ) {

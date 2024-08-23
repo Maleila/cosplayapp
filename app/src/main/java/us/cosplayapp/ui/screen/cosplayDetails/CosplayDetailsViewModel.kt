@@ -5,6 +5,8 @@ import androidx.lifecycle.ViewModel
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.callbackFlow
+import us.cosplayapp.Con.Con
+import us.cosplayapp.Con.ConWithId
 import us.cosplayapp.Cosplay.Cosplay
 import us.cosplayapp.Cosplay.CosplayWithId
 
@@ -39,6 +41,54 @@ class CosplayDetailsViewModel : ViewModel(
         awaitClose {
             snapshotListener.remove()
         }
+    }
+
+    fun conList() = callbackFlow {
+        val snapshotListener =
+            FirebaseFirestore.getInstance().collection("cons")
+                .addSnapshotListener() { snapshot, e ->
+                    val response = if (snapshot != null) {
+                        val consList = snapshot.toObjects(Con::class.java)
+                        var consWithIdList = mutableListOf<ConWithId>()
+
+                        consList.forEachIndexed { index, con ->
+                            consWithIdList.add(ConWithId(snapshot.documents[index].id, con))
+                        }
+
+                        ConUIState.Success(
+                            consWithIdList
+                        )
+                    } else {
+                        ConUIState.Error(e?.message.toString())
+                    }
+
+                    trySend(response) // emit this value through the flow
+                }
+        awaitClose {
+            snapshotListener.remove()
+        }
+    }
+
+    fun getConsList(cons: List<ConWithId>): List<String> {
+        var consList = mutableListOf<String>()
+
+        cons.forEach {
+            consList.add(it.con.name)
+        }
+
+        return consList
+    }
+
+    fun addCon(con: String, cosplay: CosplayWithId) {
+        var newConsList: MutableList<String>
+                = cosplay.cosplay.consList.toMutableList()
+        newConsList.add(con)
+
+        FirebaseFirestore.getInstance().collection(COLLECTION_COSPLAYS).document(cosplay.cosId)
+            .update(mapOf(
+                "consList" to newConsList))
+            .addOnSuccessListener { Log.d("tag", "con successfully added!") }
+            .addOnFailureListener { e -> Log.w("Error adding con", e) }
     }
 
     fun changeToDoStatus(cosplay: CosplayWithId, toDo: String, checked: Boolean, index: Int) {
@@ -162,8 +212,6 @@ class CosplayDetailsViewModel : ViewModel(
     }
 
     fun editCosplay(newCosplay: Cosplay, characterId: String) {
-        //TODO not sure this is the best way to do it
-
         Log.d("COSPLAY", characterId)
 
         FirebaseFirestore.getInstance().collection(COLLECTION_COSPLAYS).document(characterId)
@@ -183,5 +231,11 @@ class CosplayDetailsViewModel : ViewModel(
 
         data class Success(val cosList: List<CosplayWithId>) : CosplayDetailsUIState
         data class Error(val error: String?) : CosplayDetailsUIState
+    }
+    sealed interface ConUIState {
+        object Init : ConUIState
+
+        data class Success(val conList: List<ConWithId>) : ConUIState
+        data class Error(val error: String?) : ConUIState
     }
 }
