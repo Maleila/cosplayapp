@@ -24,14 +24,16 @@ class ConViewModel: ViewModel() {
 
     fun addCon(
         name: String,
-        date: String,
+        dates: Pair<String?, String?>,
         location: String
     ) {
         conUploadUiState = ConUploadUiState.LoadingConUpload
 
+        var newDateRange = listOf(dates.first!!, dates.second!!)
+
         val myCon = Con(
             name = name,
-            date = date,
+            dates = newDateRange,
             location = location
         )
 

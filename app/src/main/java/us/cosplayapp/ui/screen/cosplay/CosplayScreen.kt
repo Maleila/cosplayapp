@@ -133,7 +133,8 @@ fun CosplayScreen(
                 } else {
                     Button(onClick = {
                         showFilterDialogue = true
-                    }) {
+                    },
+                        modifier = Modifier.padding(10.dp)) {
                         Text(text = "Filter")
                     }
                     LazyColumn() {

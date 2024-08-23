@@ -5,6 +5,7 @@ import androidx.compose.material3.DatePicker
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -24,6 +25,8 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.DatePickerDialog
+import androidx.compose.material3.DateRangePicker
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
@@ -32,6 +35,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberDateRangePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -102,7 +106,7 @@ fun ConScreen(
             } else if (conListState.value is ConUploadUiState.Success) {
                 if ((conListState.value as ConUploadUiState.Success).conList.isEmpty()
                 ) {
-                    Text(text = "loading or something idk",
+                    Text(text = "no cons yet! add some :)",
                         modifier = Modifier.padding(10.dp))
                 } else {
                     LazyColumn() {
@@ -156,11 +160,58 @@ fun ConCard(
                         .weight(1f)
                 ) {
                     Text(text = con.name)
-                    Text(text = con.date)
+                    Text(text = con.dates[0] + " - " + con.dates[1])
                     Text(text = con.location)
                 }
             }
         }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun ConDatesPicker(
+    onDateRangeSelected: (Pair<String?, String?>) -> Unit,
+    onDismiss: () -> Unit
+) {
+    val dateRangePickerState = rememberDateRangePickerState()
+
+    DatePickerDialog(
+        onDismissRequest = onDismiss,
+        confirmButton = {
+            Button(
+                onClick = {
+                    onDateRangeSelected(
+                        Pair(
+                            convertMillisToDate(dateRangePickerState.selectedStartDateMillis!!),
+                            convertMillisToDate(dateRangePickerState.selectedEndDateMillis!!)
+                        )
+                    )
+                    onDismiss()
+                }
+            ) {
+                Text("OK")
+            }
+        },
+        dismissButton = {
+            Button(onClick = onDismiss) {
+                Text("Cancel")
+            }
+        }
+    ) {
+        DateRangePicker(
+            state = dateRangePickerState,
+            title = {
+                Text(
+                    text = "Select date range"
+                )
+            },
+            showModeToggle = false,
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(500.dp)
+                .padding(16.dp)
+        )
     }
 }
 
@@ -177,15 +228,15 @@ fun AddDialogue(
         convertMillisToDate(it)
     } ?: ""
 
+    var selectedDates by rememberSaveable {
+        mutableStateOf<Pair<String?, String?>>(Pair("", ""))
+    }
+
     Dialog(
         onDismissRequest = onDialogDismiss
     ) {
 
         var name by rememberSaveable {
-            mutableStateOf("")
-        }
-
-        var date by rememberSaveable {
             mutableStateOf("")
         }
 
@@ -212,20 +263,11 @@ fun AddDialogue(
                 label = { Text(text = "con name")}
             )
             Text(text = "Date", modifier = Modifier.padding(horizontal = 10.dp))
-            OutlinedTextField(
-                modifier = Modifier.fillMaxWidth(),
-                value = date,
-                singleLine = true,
-                onValueChange = {
-                    date = it
-                },
-                label = { Text(text = "con date")}
-            )
             //code from https://developer.android.com/develop/ui/compose/components/datepickers
             OutlinedTextField(modifier = Modifier
                 .fillMaxWidth()
                 .height(64.dp),
-                value = selectedDate,
+                value = selectedDates.first + " - " + selectedDates.second,
                 onValueChange = {},
                 readOnly = true,
                 trailingIcon = {
@@ -237,24 +279,39 @@ fun AddDialogue(
                     }
                 })
             if (showDatePicker) {
-                Popup(
-                    onDismissRequest = { showDatePicker = false },
-                    alignment = Alignment.TopStart
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .offset(y = 64.dp)
-                            .shadow(elevation = 4.dp)
-                            .background(MaterialTheme.colorScheme.surface)
-                            .padding(16.dp)
-                    ) {
-                        DatePicker(
-                            state = datePickerState,
-                            showModeToggle = false
-                        )
-                    }
-                }
+                ConDatesPicker(
+                    onDateRangeSelected = {
+                                          selectedDates = it
+                    },
+                    onDismiss = { showDatePicker = false })
+//                Popup(
+//                    onDismissRequest = { showDatePicker = false },
+//                    alignment = Alignment.TopStart
+//                ) {
+//                    Box(
+//                        modifier = Modifier
+//                            .fillMaxWidth()
+//                            .offset(y = 64.dp)
+//                            .shadow(elevation = 4.dp)
+//                            .background(MaterialTheme.colorScheme.surface)
+//                            .padding(16.dp)
+//                    ) {
+//                        DatePicker(
+//                            state = datePickerState,
+//                            showModeToggle = false
+//                        )
+//                        Row(
+//                            modifier = Modifier.fillMaxWidth(),
+//                            horizontalArrangement = Arrangement.End
+//                        ) {
+//                            Button(onClick =
+//                            { showDatePicker = false }) {
+//                                Text(text = "Select")
+//                            }
+//                        }
+//
+//                    }
+//                }
             }
             Text(text = "Location", modifier = Modifier.padding(horizontal = 10.dp))
             OutlinedTextField(
@@ -275,7 +332,7 @@ fun AddDialogue(
                     onClick = {
                         conViewModel.addCon(
                                 name,
-                                date,
+                                selectedDates,
                                 location)
                         onDialogDismiss()
                     }) {
