@@ -7,7 +7,6 @@ import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.callbackFlow
 import us.cosplayapp.Cosplay.Cosplay
 import us.cosplayapp.Cosplay.CosplayWithId
-import us.cosplayapp.ui.screen.cosplay.CosplayViewModel
 
 class CosplayDetailsViewModel : ViewModel(
 
@@ -43,18 +42,17 @@ class CosplayDetailsViewModel : ViewModel(
     }
 
     fun changeToDoStatus(cosplay: CosplayWithId, toDo: String, checked: Boolean, index: Int) {
-        var newTodo: String
-        if(checked) {
-            newTodo = "1" + toDo
+        var newTodo: String = if(checked) {
+            "1$toDo"
         } else {
-            newTodo = "0" + toDo
+            "0$toDo"
         }
 
         var newTodos: MutableList<String>
                 = cosplay.cosplay.toDo.toMutableList()
         newTodos[index] = newTodo
 
-        Log.d("TODO", "updating to " + newTodo)
+        Log.d("TODO", "updating to $newTodo")
 
         FirebaseFirestore.getInstance().collection(COLLECTION_COSPLAYS).document(cosplay.cosId)
             .update(mapOf(
@@ -64,11 +62,10 @@ class CosplayDetailsViewModel : ViewModel(
     }
 
     fun addToDoItem(toDo: String, checked: Boolean, cosplay: CosplayWithId) {
-        var newTodo: String
-        if(checked) {
-            newTodo = "1" + toDo
+        var newTodo: String = if(checked) {
+            "1$toDo"
         } else {
-            newTodo = "0" + toDo
+            "0$toDo"
         }
 
         var newTodos: MutableList<String>
@@ -87,15 +84,15 @@ class CosplayDetailsViewModel : ViewModel(
         var newTodos = cosplay.cosplay.toDo.toMutableList()
         Log.d("DELETE", "list pre-delete:")
         newTodos.forEachIndexed { index, item ->
-            Log.d("DELETE", index.toString() + ": " + item)
+            Log.d("DELETE", "$index: $item")
         }
 
-        Log.d("DELETE", "deleting item #" + index)
+        Log.d("DELETE", "deleting item #$index")
         Log.d("DELETE", newTodos.removeAt(index))
 
         Log.d("DELETE", "new list:")
         newTodos.forEachIndexed { index, item ->
-            Log.d("DELETE", index.toString() + ": " + item)
+            Log.d("DELETE", "$index: $item")
         }
 
         FirebaseFirestore.getInstance().collection(COLLECTION_COSPLAYS).document(cosplay.cosId)
@@ -115,7 +112,7 @@ class CosplayDetailsViewModel : ViewModel(
         return Cosplay("", "", "","", "", "", "", listOf(""))
     }
 
-    fun editCosplay(newCosplay: Cosplay, characterId: String, cosplays: List<CosplayWithId>) {
+    fun editCosplay(newCosplay: Cosplay, characterId: String) {
         //TODO not sure this is the best way to do it
 
         Log.d("COSPLAY", characterId)

@@ -50,7 +50,6 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.Popup
 import androidx.lifecycle.viewmodel.compose.viewModel
 import us.cosplayapp.Con.Con
-import us.cosplayapp.ui.screen.home.HomeViewModel
 import java.util.Date
 import java.util.Locale
 

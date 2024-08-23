@@ -5,35 +5,26 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.CutCornerShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AddCircleOutline
-import androidx.compose.material.icons.filled.Build
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
-import androidx.compose.material3.TextFieldColors
-import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -49,14 +40,12 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.LocalFocusManager
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.viewmodel.compose.viewModel
 import us.cosplayapp.Cosplay.Cosplay
 import us.cosplayapp.Cosplay.CosplayWithId
-import us.cosplayapp.ui.screen.cosplay.CosplayViewModel
 import us.cosplayapp.ui.screen.cosplay.Dropdown
 
 @Composable
@@ -83,7 +72,7 @@ fun CosplayDetails(
         if (cosplayListState.value == CosplayDetailsViewModel.CosplayDetailsUIState.Init) {
             Text(text = "loading")
         } else {
-            cosplayDetails(
+            CosplayDetails(
                 cosplay = CosplayWithId(id,
                     cosplayDetailsViewModel.getCosplayById(
                         id,
@@ -96,18 +85,16 @@ fun CosplayDetails(
             )
 
             if(showEditDialog) {
-                editDialogue(
+                EditDialogue(
                     cosplay = cosplayDetailsViewModel.getCosplayById(
                         id,
                         (cosplayListState.value as CosplayDetailsViewModel.CosplayDetailsUIState.Success).cosList
                     ), //TODO maybe still not the best way to get this reference
                     id,
-                    cosplayDetailsViewModel,
-                    onDialogDismiss = {
-                        showEditDialog = false
-                    },
-                    (cosplayListState.value as CosplayDetailsViewModel.CosplayDetailsUIState.Success).cosList
-                )
+                    cosplayDetailsViewModel
+                ) {
+                    showEditDialog = false
+                }
             }
         }
     }
@@ -115,16 +102,20 @@ fun CosplayDetails(
 
 @OptIn(ExperimentalLayoutApi::class, ExperimentalMaterial3Api::class)
 @Composable
-fun cosplayDetails(cosplay: CosplayWithId,
+fun CosplayDetails(cosplay: CosplayWithId,
                    onEditCosplay: (Cosplay) -> Unit = {},
                    cosplayDetailsViewModel: CosplayDetailsViewModel)
 {
-    var charTextColor: Color = if(cosplay.cosplay.progress == "Not started") {
-        Color.Red
-    } else if(cosplay.cosplay.progress == "In Progress") {
-        Color(0xFFFF9800)
-    } else {
-        Color.Green
+    var charTextColor: Color = when (cosplay.cosplay.progress) {
+        "Not started" -> {
+            Color.Red
+        }
+        "In Progress" -> {
+            Color(0xFFFF9800)
+        }
+        else -> {
+            Color.Green
+        }
     }
 
     Row(modifier = Modifier.fillMaxWidth(),
@@ -237,7 +228,7 @@ fun CheckList(cosplay: CosplayWithId,
                         horizontalArrangement = Arrangement.Start,
                         verticalAlignment = Alignment.CenterVertically) {
                         Checkbox(
-                            checked = todo.get(0) == '1',
+                            checked = todo[0] == '1',
                             onCheckedChange = {
                                 onEditItem(cosplay, todo.substring(1), it, index)
                             }
@@ -294,7 +285,7 @@ fun CheckList(cosplay: CosplayWithId,
                                 modifier = Modifier
                                     .padding(5.dp)
                                     .clickable {
-                                        onEditItem(cosplay, editedTodo, todo.get(0) == '1', index)
+                                        onEditItem(cosplay, editedTodo, todo[0] == '1', index)
                                         itemModifiable = false
                                     },
                                 tint = Color.White
@@ -327,7 +318,7 @@ fun CheckList(cosplay: CosplayWithId,
                             newCheck = it
                         }
                     )
-                    transparentTextfield(value = newTodo,
+                    TransparentTextField(value = newTodo,
                         onValueChange = {
                             newTodo = it
                         })
@@ -366,7 +357,7 @@ fun CheckList(cosplay: CosplayWithId,
 }
 
 @Composable
-fun transparentTextfield(
+fun TransparentTextField(
     value: String,
     onValueChange: (String) -> Unit
 ) {
@@ -396,12 +387,11 @@ fun transparentTextfield(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun editDialogue(
+fun EditDialogue(
     cosplay: Cosplay,
     characterRef: String,
     cosplayDetailsViewModel: CosplayDetailsViewModel,
-    onDialogDismiss: () -> Unit = {},
-    cosplayListWithId: List<CosplayWithId>
+    onDialogDismiss: () -> Unit = {}
 ) {
     //code from https://developer.android.com/develop/ui/compose/components/datepickers
 
@@ -509,15 +499,16 @@ fun editDialogue(
                         containerColor = Color.White
                     ),
                     onClick = {
-                        cosplayDetailsViewModel.editCosplay(Cosplay(
-                            character = character,
-                            media = media,
-                            mediaType = mediaType,
-                            progress = progress,
-                            complexity = complexity,
-                            notes = notes),
-                            characterRef,
-                            cosplayListWithId)
+                        cosplayDetailsViewModel.editCosplay(
+                            Cosplay(
+                                character = character,
+                                media = media,
+                                mediaType = mediaType,
+                                progress = progress,
+                                complexity = complexity,
+                                notes = notes),
+                            characterRef
+                        )
                         onDialogDismiss()
                     }) {
                     Text(text = "Save")

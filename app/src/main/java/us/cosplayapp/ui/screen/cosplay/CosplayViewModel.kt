@@ -3,8 +3,6 @@ package us.cosplayapp.ui.screen.cosplay
 import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -13,8 +11,6 @@ import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
-import us.cosplayapp.Con.Con
-import us.cosplayapp.Con.ConWithId
 import us.cosplayapp.Cosplay.CosplayWithId
 import us.cosplayapp.Cosplay.Cosplay
 
@@ -110,7 +106,7 @@ class CosplayViewModel: ViewModel() {
             q = q.whereEqualTo("progress", progressParam)
         }
 
-        Log.d("FILTER", mediaTypeParam + ", " + complexityParam + ", " + progressParam)
+        Log.d("FILTER", "$mediaTypeParam, $complexityParam, $progressParam")
 
         q.get()
         .addOnSuccessListener { documents ->
