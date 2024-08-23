@@ -61,6 +61,26 @@ class CosplayDetailsViewModel : ViewModel(
             .addOnFailureListener { e -> Log.w("Error updating todo item", e) }
     }
 
+    fun changeChecklistItemStatus(cosplay: CosplayWithId, item: String, checked: Boolean, index: Int) {
+        var newItem: String = if(checked) {
+            "1$item"
+        } else {
+            "0$item"
+        }
+
+        var newChecklist: MutableList<String>
+                = cosplay.cosplay.checklist.toMutableList()
+        newChecklist[index] = newItem
+
+        Log.d("CHECKLIST", "updating to $newItem")
+
+        FirebaseFirestore.getInstance().collection(COLLECTION_COSPLAYS).document(cosplay.cosId)
+            .update(mapOf(
+                "checklist" to newChecklist))
+            .addOnSuccessListener { Log.d("tag", "checklist item successfully updated!") }
+            .addOnFailureListener { e -> Log.w("Error updating checklist item", e) }
+    }
+
     fun addToDoItem(toDo: String, checked: Boolean, cosplay: CosplayWithId) {
         var newTodo: String = if(checked) {
             "1$toDo"
@@ -79,7 +99,23 @@ class CosplayDetailsViewModel : ViewModel(
             .addOnFailureListener { e -> Log.w("Error adding todo item", e) }
     }
 
-    //TODO doesn't seem to be recomposing/grabbing new todo list after delete
+    fun addChecklistItem(item: String, checked: Boolean, cosplay: CosplayWithId) {
+        var newItem: String = if(checked) {
+            "1$item"
+        } else {
+            "0$item"
+        }
+
+        var newItems: MutableList<String>
+                = cosplay.cosplay.checklist.toMutableList()
+        newItems.add(newItem)
+
+        FirebaseFirestore.getInstance().collection(COLLECTION_COSPLAYS).document(cosplay.cosId)
+            .update(mapOf(
+                "checklist" to newItems))
+            .addOnSuccessListener { Log.d("tag", "todo item successfully added!") }
+            .addOnFailureListener { e -> Log.w("Error adding todo item", e) }
+    }
     fun deleteToDo(cosplay: CosplayWithId, index: Int) {
         var newTodos = cosplay.cosplay.toDo.toMutableList()
         Log.d("DELETE", "list pre-delete:")
@@ -98,6 +134,19 @@ class CosplayDetailsViewModel : ViewModel(
         FirebaseFirestore.getInstance().collection(COLLECTION_COSPLAYS).document(cosplay.cosId)
             .update(mapOf(
                 "toDo" to newTodos))
+            .addOnSuccessListener { Log.d("DELETE", "todo item successfully removed!") }
+            .addOnFailureListener { e -> Log.w("Error removing todo item", e) }
+    }
+
+    //TODO these functions for the 2 checklists could probably be optimized for less duplicate code
+    fun deleteChecklistItem(cosplay: CosplayWithId, index: Int) {
+        var newItems = cosplay.cosplay.checklist.toMutableList()
+
+        newItems.removeAt(index)
+
+        FirebaseFirestore.getInstance().collection(COLLECTION_COSPLAYS).document(cosplay.cosId)
+            .update(mapOf(
+                "checklist" to newItems))
             .addOnSuccessListener { Log.d("DELETE", "todo item successfully removed!") }
             .addOnFailureListener { e -> Log.w("Error removing todo item", e) }
     }

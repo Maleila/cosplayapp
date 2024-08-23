@@ -8,7 +8,8 @@ data class Cosplay(
     var progress: String = "",
     var complexity: String = "",
     var notes: String = "",
-    var toDo: List<String> = listOf("")
+    var toDo: List<String> = listOf(""),
+    var checklist: List<String> = listOf("")
 )
 
 data class CosplayWithId(

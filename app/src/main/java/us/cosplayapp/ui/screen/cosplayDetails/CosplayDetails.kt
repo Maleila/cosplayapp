@@ -171,8 +171,13 @@ fun CosplayDetails(cosplay: CosplayWithId,
         modifier = Modifier.padding(10.dp)
     )
     Spacer(modifier = Modifier.fillMaxHeight(0.02f))
-
+    Text(
+        text = "To Do",
+        style = MaterialTheme.typography.bodyLarge,
+        modifier = Modifier.padding(10.dp)
+    )
     CheckList(cosplay,
+        cosplay.cosplay.toDo,
               onEditItem = {cosplay, editedTodo, checked, index ->
                   cosplayDetailsViewModel.changeToDoStatus(
                       cosplay,
@@ -187,12 +192,37 @@ fun CosplayDetails(cosplay: CosplayWithId,
               onDeleteItem = { cosplay, index ->
                 cosplayDetailsViewModel.deleteToDo(cosplay, index)
                 }
-        )
+    )
+    Spacer(modifier = Modifier.fillMaxHeight(0.02f))
+    Text(
+        text = "Con Checklist",
+        style = MaterialTheme.typography.bodyLarge,
+        modifier = Modifier.padding(10.dp)
+    )
+    CheckList(cosplay,
+        cosplay.cosplay.checklist,
+        onEditItem = {cosplay, editedItem, checked, index ->
+            cosplayDetailsViewModel.changeChecklistItemStatus(
+                cosplay,
+                editedItem,
+                checked,
+                index
+            )
+        },
+        onAddItem = { newItem, newCheck, cosplay ->
+            cosplayDetailsViewModel.addChecklistItem(newItem, newCheck, cosplay)
+        },
+        onDeleteItem = { cosplay, index ->
+            cosplayDetailsViewModel.deleteChecklistItem(cosplay, index)
+        }
+    )
+
 
 }
 
 @Composable
 fun CheckList(cosplay: CosplayWithId,
+              items: List<String>,
               onEditItem: (CosplayWithId, String, Boolean, Int) -> Unit,
               onAddItem: (String, Boolean, CosplayWithId) -> Unit,
               onDeleteItem: (CosplayWithId, Int) -> Unit) {
@@ -209,17 +239,12 @@ fun CheckList(cosplay: CosplayWithId,
     }
 
     Column {
-        Text(
-            text = "To Do",
-            style = MaterialTheme.typography.bodyLarge,
-            modifier = Modifier.padding(10.dp)
-        )
-        cosplay.cosplay.toDo.forEachIndexed { index, todo ->
+        items.forEachIndexed { index, item ->
             Row(verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier.fillMaxWidth()) {
-                if(todo != "") {
+                if(item != "") {
                     var editedTodo by rememberSaveable {
-                        mutableStateOf(todo.substring(1))
+                        mutableStateOf(item.substring(1))
                     }
                     var itemModifiable by rememberSaveable {
                         mutableStateOf(false)
@@ -228,9 +253,9 @@ fun CheckList(cosplay: CosplayWithId,
                         horizontalArrangement = Arrangement.Start,
                         verticalAlignment = Alignment.CenterVertically) {
                         Checkbox(
-                            checked = todo[0] == '1',
+                            checked = item[0] == '1',
                             onCheckedChange = {
-                                onEditItem(cosplay, todo.substring(1), it, index)
+                                onEditItem(cosplay, item.substring(1), it, index)
                             }
                         )
                         //can't use the same textfield bc one needs to be the actual to-do
@@ -239,7 +264,7 @@ fun CheckList(cosplay: CosplayWithId,
                         //unless I can get the local var to listen for changes to the to-do...
                         if(!itemModifiable) {
                             BasicTextField(
-                                value = todo.substring(1),
+                                value = item.substring(1),
                                 onValueChange = {
                                     editedTodo = it
                                 },
@@ -248,7 +273,7 @@ fun CheckList(cosplay: CosplayWithId,
                                     .padding(5.dp)
                                     .clickable {
                                         itemModifiable = true
-                                        editedTodo = todo.substring(1)
+                                        editedTodo = item.substring(1)
                                         //should also focus so you don't have to click twice
                                     },
                                 textStyle = TextStyle(Color.White),
@@ -285,7 +310,7 @@ fun CheckList(cosplay: CosplayWithId,
                                 modifier = Modifier
                                     .padding(5.dp)
                                     .clickable {
-                                        onEditItem(cosplay, editedTodo, todo[0] == '1', index)
+                                        onEditItem(cosplay, editedTodo, item[0] == '1', index)
                                         itemModifiable = false
                                     },
                                 tint = Color.White
