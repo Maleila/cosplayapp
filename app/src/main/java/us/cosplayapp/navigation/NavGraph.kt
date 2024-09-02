@@ -7,6 +7,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import us.cosplayapp.ui.screen.conDetails.ConDetails
 import us.cosplayapp.ui.screen.cons.ConScreen
 import us.cosplayapp.ui.screen.cosplay.CosplayScreen
 import us.cosplayapp.ui.screen.cosplayDetails.CosplayDetails
@@ -31,7 +32,11 @@ fun NavGraph (
             )
         }
         composable(Screen.Cons.route) {
-            ConScreen()
+            ConScreen(
+                onNavigateToDetailsScreen = { con ->
+                    navController.navigate("conDetails/$con")
+                },
+            )
         }
         composable(Screen.Cosplay.route) {
             CosplayScreen(
@@ -46,6 +51,15 @@ fun NavGraph (
             val character = it.arguments?.getString("character")
             if (character != null) {
                 CosplayDetails(character)
+            }
+        }
+        composable("conDetails/{con}",
+            arguments = listOf(
+                navArgument("con") { type = NavType.StringType }
+            )) {
+            val con = it.arguments?.getString("con")
+            if (con != null) {
+                ConDetails(con)
             }
         }
     }

@@ -61,6 +61,7 @@ import java.util.Locale
 @Composable
 fun ConScreen(
     conViewModel: ConViewModel = viewModel(),
+    onNavigateToDetailsScreen: (String) -> Unit
 ) {
 
     var showAddDialog by rememberSaveable {
@@ -111,8 +112,8 @@ fun ConScreen(
                 } else {
                     LazyColumn() {
                         items((conListState.value as ConUploadUiState.Success).conList) {
-                            ConCard(con = it.con
-//                                onCardClicked = { onNavigateToDetailsScreen(it.con.name)}
+                            ConCard(con = it.con,
+                                onCardClicked = { onNavigateToDetailsScreen(it.conId)}
                                                         )
                         }
                     }
