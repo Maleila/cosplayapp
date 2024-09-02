@@ -5,6 +5,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -200,9 +201,10 @@ fun CosplayDetails(cosplay: CosplayWithId,
         style = MaterialTheme.typography.bodyLarge,
         modifier = Modifier.padding(10.dp)
     )
-    Row() {
+    FlowRow() {
         cosplay.cosplay.consList.forEach { con ->
-            Button(onClick = { /*TODO*/ }) {
+            Button(onClick = { /*TODO*/ },
+                modifier = Modifier.padding(5.dp)) {
                 Text(text = con)
             }
         }
