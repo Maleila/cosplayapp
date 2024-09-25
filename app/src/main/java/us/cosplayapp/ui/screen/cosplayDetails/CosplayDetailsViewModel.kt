@@ -83,6 +83,10 @@ class CosplayDetailsViewModel : ViewModel(
         var newConsList: MutableList<String>
                 = cosplay.cosplay.consList.toMutableList()
         newConsList.add(con)
+        //not a great fix cause this only removes this after someone clicks the add button
+        if(newConsList[0] == "") {
+            newConsList.removeAt(0)
+        }
 
         FirebaseFirestore.getInstance().collection(COLLECTION_COSPLAYS).document(cosplay.cosId)
             .update(mapOf(

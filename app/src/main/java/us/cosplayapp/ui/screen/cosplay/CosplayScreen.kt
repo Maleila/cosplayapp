@@ -15,6 +15,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.DateRange
+import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material.icons.outlined.ArrowDropDown
 import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material3.Button
@@ -257,6 +258,24 @@ fun AddDialogue(
             mutableStateOf("")
         }
 
+        var characterErrorState by rememberSaveable {
+            mutableStateOf(
+                false
+            ) }
+
+        var characterErrorText by rememberSaveable {
+            mutableStateOf("")
+        }
+
+        fun validateCharacter(text: String) {
+            if (text.trim() == "") {
+                characterErrorState = true
+                characterErrorText = "Enter a character name"
+            } else {
+                characterErrorState = false
+            }
+        }
+
         Column(
             Modifier
                 .background(
@@ -270,11 +289,28 @@ fun AddDialogue(
                 modifier = Modifier.fillMaxWidth(),
                 value = character,
                 singleLine = true,
+                trailingIcon = {
+                    if (characterErrorState) {
+                        Icon(
+                            Icons.Filled.Warning, "name error",
+                            tint = MaterialTheme.colorScheme.error
+                        )
+                    }
+                },
                 onValueChange = {
                     character = it
+                    validateCharacter(it)
                 },
                 label = { Text(text = "character name")}
             )
+            if (characterErrorState) {
+                Text(
+                    text = characterErrorText,
+                    color = MaterialTheme.colorScheme.error,
+                    style = MaterialTheme.typography.labelSmall,
+                    modifier = Modifier.padding(start = 16.dp)
+                )
+            }
             Text(text = "Media", modifier = Modifier.padding(horizontal = 10.dp))
             OutlinedTextField(
                 modifier = Modifier.fillMaxWidth(),
@@ -333,6 +369,8 @@ fun AddDialogue(
                         containerColor = Color.White
                     ),
                     onClick = {
+                        validateCharacter(character)
+                        if(!characterErrorState) {
                         cosplayViewModel.addCosplay(
                             character,
                             media,
@@ -341,7 +379,7 @@ fun AddDialogue(
                             progress,
                             notes)
                         onDialogDismiss()
-                    }) {
+                    } }) {
                     Text(text = "Add")
                 }
 

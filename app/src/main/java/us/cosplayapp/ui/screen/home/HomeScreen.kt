@@ -62,7 +62,8 @@ fun HomeScreen(
         Column(modifier = Modifier.padding(it).fillMaxSize(),
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally) {
-            Text(text = "hello")
+            Text(text = "<cosplays in progress>")
+            Text(text = "<upcoming cons>")
         }
     }
 }

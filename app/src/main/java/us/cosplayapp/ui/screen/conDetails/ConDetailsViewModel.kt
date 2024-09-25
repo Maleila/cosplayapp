@@ -7,6 +7,8 @@ import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.callbackFlow
 import us.cosplayapp.Con.Con
 import us.cosplayapp.Con.ConWithId
+import us.cosplayapp.Cosplay.Cosplay
+import us.cosplayapp.ui.screen.cosplayDetails.CosplayDetailsViewModel
 
 class ConDetailsViewModel: ViewModel() {
 
@@ -49,6 +51,18 @@ class ConDetailsViewModel: ViewModel() {
         }
 
         return Con("", "", listOf(""),"")
+    }
+
+    fun editCon(newCon: ConWithId) {
+        Log.d("EDITCON", newCon.conId)
+
+        FirebaseFirestore.getInstance().collection(COLLECTION_CONS).document(newCon.conId)
+            .update(mapOf(
+                "name" to newCon.con.name,
+                "dates" to newCon.con.dates,
+                "location" to newCon.con.location))
+            .addOnSuccessListener { Log.d("tag", "DocumentSnapshot successfully updated!") }
+            .addOnFailureListener { e -> Log.w("Error updating document", e) }
     }
 
     sealed interface ConUIState {
