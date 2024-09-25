@@ -245,6 +245,40 @@ fun AddDialogue(
             mutableStateOf("")
         }
 
+        var nameErrorState by rememberSaveable {
+            mutableStateOf(false)
+        }
+
+        var locationErrorState by rememberSaveable {
+            mutableStateOf(false)
+        }
+
+        var nameErrorText by rememberSaveable {
+            mutableStateOf("")
+        }
+
+        var locationErrorText by rememberSaveable {
+            mutableStateOf("")
+        }
+
+        fun validateName(text: String) {
+            if (text.trim() == "") {
+                nameErrorState = true
+                nameErrorText = "Enter a con"
+            } else {
+                nameErrorState = false
+            }
+    }
+
+        fun validateLocation(text: String){
+            if (text.trim() == "") {
+                locationErrorState = true
+                locationErrorText = "Enter a location"
+            } else {
+                locationErrorState = false
+            }
+        }
+
         Column(
             Modifier
                 .background(
@@ -258,11 +292,28 @@ fun AddDialogue(
                 modifier = Modifier.fillMaxWidth(),
                 value = name,
                 singleLine = true,
+                trailingIcon = {
+                    if (nameErrorState) {
+                        Icon(
+                            Icons.Filled.Warning, "name error",
+                            tint = MaterialTheme.colorScheme.error
+                        )
+                    }
+                },
                 onValueChange = {
                     name = it
+                    validateName(it)
                 },
                 label = { Text(text = "con name")}
             )
+            if (nameErrorState) {
+                Text(
+                    text = nameErrorText,
+                    color = MaterialTheme.colorScheme.error,
+                    style = MaterialTheme.typography.labelSmall,
+                    modifier = Modifier.padding(start = 16.dp)
+                )
+            }
             Text(text = "Date", modifier = Modifier.padding(horizontal = 10.dp))
             //code from https://developer.android.com/develop/ui/compose/components/datepickers
             OutlinedTextField(modifier = Modifier
@@ -319,11 +370,28 @@ fun AddDialogue(
                 modifier = Modifier.fillMaxWidth(),
                 value = location,
                 singleLine = true,
+                trailingIcon = {
+                    if (locationErrorState) {
+                        Icon(
+                            Icons.Filled.Warning, "location error",
+                            tint = MaterialTheme.colorScheme.error
+                        )
+                    }
+                },
                 onValueChange = {
                     location = it
+                    validateLocation(it)
                 },
                 label = { Text(text = "con location")}
             )
+            if (locationErrorState) {
+                Text(
+                    text = locationErrorText,
+                    color = MaterialTheme.colorScheme.error,
+                    style = MaterialTheme.typography.labelSmall,
+                    modifier = Modifier.padding(start = 16.dp)
+                )
+            }
             Row {
                 Button(modifier = Modifier.padding(10.dp),
                     colors = ButtonDefaults.outlinedButtonColors(
@@ -331,11 +399,15 @@ fun AddDialogue(
                         containerColor = Color.White
                     ),
                     onClick = {
-                        conViewModel.addCon(
+                        validateName(name)
+                        validateLocation(location)
+                        if(!locationErrorState && !nameErrorState) {
+                            conViewModel.addCon(
                                 name,
                                 selectedDates,
                                 location)
-                        onDialogDismiss()
+                            onDialogDismiss()
+                        }
                     }) {
                     Text(text = "Add")
                 }
