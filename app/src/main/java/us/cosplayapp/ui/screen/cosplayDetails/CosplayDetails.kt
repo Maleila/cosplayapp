@@ -633,7 +633,19 @@ fun EditDialogue(
                     }) {
                     Text(text = "Save")
                 }
-
+                Button(modifier = Modifier.padding(10.dp),
+                    colors = ButtonDefaults.outlinedButtonColors(
+                        contentColor = Color.Black,
+                        containerColor = Color.Red
+                    ),
+                    onClick = {
+                        cosplayDetailsViewModel.deleteCosplay(
+                            characterRef
+                        )
+                        onDialogDismiss()
+                    }) {
+                    Text(text = "Delete")
+                }
             }
         }
     }

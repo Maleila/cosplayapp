@@ -230,6 +230,13 @@ class CosplayDetailsViewModel : ViewModel(
             .addOnFailureListener { e -> Log.w("Error updating document", e) }
     }
 
+    fun deleteCosplay(id: String) {
+        FirebaseFirestore.getInstance().collection(COLLECTION_COSPLAYS).document(id)
+            .delete()
+            .addOnSuccessListener { Log.d("DELETE", "DocumentSnapshot successfully deleted!") }
+            .addOnFailureListener { e -> Log.w("DELETE", "Error deleting document", e) }
+    }
+
     sealed interface CosplayDetailsUIState {
         object Init : CosplayDetailsUIState
 

@@ -263,7 +263,15 @@ fun AddDialogue(
                 false
             ) }
 
+        var mediaErrorState by rememberSaveable {
+            mutableStateOf(false)
+        }
+
         var characterErrorText by rememberSaveable {
+            mutableStateOf("")
+        }
+
+        var mediaErrorText by rememberSaveable{
             mutableStateOf("")
         }
 
@@ -273,6 +281,15 @@ fun AddDialogue(
                 characterErrorText = "Enter a character name"
             } else {
                 characterErrorState = false
+            }
+        }
+
+        fun validateMedia(text: String) {
+            if (text.trim() == "") {
+                mediaErrorState = true
+                mediaErrorText = "Enter the name of the media"
+            } else {
+                mediaErrorState = false
             }
         }
 
@@ -316,11 +333,28 @@ fun AddDialogue(
                 modifier = Modifier.fillMaxWidth(),
                 value = media,
                 singleLine = true,
+                trailingIcon = {
+                    if (mediaErrorState) {
+                        Icon(
+                            Icons.Filled.Warning, "media error",
+                            tint = MaterialTheme.colorScheme.error
+                        )
+                    }
+                },
                 onValueChange = {
                     media = it
+                    validateMedia(it)
                 },
                 label = { Text(text = "media")}
             )
+            if (mediaErrorState) {
+                Text(
+                    text = mediaErrorText,
+                    color = MaterialTheme.colorScheme.error,
+                    style = MaterialTheme.typography.labelSmall,
+                    modifier = Modifier.padding(start = 16.dp)
+                )
+            }
             Text(text = "Media type", modifier = Modifier.padding(horizontal = 10.dp))
             Dropdown(
                 listOf("Anime", "Movie", "Show", "Podcast", "Book", "Other"),
@@ -370,7 +404,8 @@ fun AddDialogue(
                     ),
                     onClick = {
                         validateCharacter(character)
-                        if(!characterErrorState) {
+                        validateMedia(media)
+                        if(!characterErrorState && !mediaErrorState) {
                         cosplayViewModel.addCosplay(
                             character,
                             media,
