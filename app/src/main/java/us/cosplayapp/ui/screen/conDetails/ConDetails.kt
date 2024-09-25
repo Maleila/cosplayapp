@@ -38,13 +38,18 @@ import us.cosplayapp.ui.screen.cosplayDetails.CosplayDetailsViewModel
 @Composable
 fun ConDetails(
     id: String,
-    conDetailsViewModel: ConDetailsViewModel = viewModel()
+    conDetailsViewModel: ConDetailsViewModel = viewModel(),
+    onNavigateToConScreen: () -> Unit
 ) {
 
     val conListState = conDetailsViewModel.conList().collectAsState(
         initial = ConDetailsViewModel.ConUIState.Init )
 
     var showEditDialog by rememberSaveable {
+        mutableStateOf(false)
+    }
+
+    var isDeleted by rememberSaveable {
         mutableStateOf(false)
     }
 
@@ -57,20 +62,24 @@ fun ConDetails(
         if (conListState.value == ConDetailsViewModel.ConUIState.Init) {
             Text(text = "loading")
         } else {
-            ConDetails(
-                con = ConWithId(id,
-                    conDetailsViewModel.getConById(
-                        id,
-                        (conListState.value as ConDetailsViewModel.ConUIState.Success).conList
-                    )),
-                onEditCon = { con ->
-                    showEditDialog = true
-                },
+            if(!isDeleted) {
+                ConDetails(
+                    con = ConWithId(id,
+                        conDetailsViewModel.getConById(
+                            id,
+                            (conListState.value as ConDetailsViewModel.ConUIState.Success).conList
+                        )),
+                    onEditCon = { con ->
+                        showEditDialog = true
+                    },
 //                onAddCon = {
 //                    showAddConDialogue = true
 //                },
-                conDetailsViewModel
-            )
+                    conDetailsViewModel
+                )
+            } else {
+                Text(text="you deleted it :(")
+            }
 
             if(showEditDialog) {
                 EditDialogue(
@@ -79,10 +88,15 @@ fun ConDetails(
                             id,
                             (conListState.value as ConDetailsViewModel.ConUIState.Success).conList
                         )), //TODO maybe still not the best way to get this reference
-                    conDetailsViewModel
-                ) {
-                    showEditDialog = false
-                }
+                    conDetailsViewModel,
+                    onDialogDismiss = {
+                        showEditDialog = false
+                    },
+                    onNavigateToConScreen,
+                    onDelete = {
+                        isDeleted = true //TODO not the smoothest way to deal with this
+                    }
+                )
             }
         }
     }
@@ -117,7 +131,9 @@ fun ConDetails(con: ConWithId,
 fun EditDialogue(
     con: ConWithId,
     conDetailsViewModel: ConDetailsViewModel,
-    onDialogDismiss: () -> Unit = {}
+    onDialogDismiss: () -> Unit = {},
+    onNavigateToConScreen: () -> Unit,
+    onDelete: () -> Unit
 ) {
     //code from https://developer.android.com/develop/ui/compose/components/datepickers
 
@@ -191,6 +207,21 @@ fun EditDialogue(
                         onDialogDismiss()
                     }) {
                     Text(text = "Save")
+                }
+                Button(modifier = Modifier.padding(10.dp),
+                    colors = ButtonDefaults.outlinedButtonColors(
+                        contentColor = Color.Black,
+                        containerColor = Color.Red
+                    ),
+                    onClick = {
+                        onDelete()
+                        conDetailsViewModel.deleteCon(
+                            con.conId
+                        )
+                        onDialogDismiss()
+                        onNavigateToConScreen()
+                    }) {
+                    Text(text = "Delete")
                 }
 
             }

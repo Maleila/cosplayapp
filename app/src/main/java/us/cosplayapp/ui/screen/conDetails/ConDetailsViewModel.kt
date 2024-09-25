@@ -65,6 +65,13 @@ class ConDetailsViewModel: ViewModel() {
             .addOnFailureListener { e -> Log.w("Error updating document", e) }
     }
 
+    fun deleteCon(id: String) {
+        FirebaseFirestore.getInstance().collection(COLLECTION_CONS).document(id)
+            .delete()
+            .addOnSuccessListener { Log.d("DELETE", "DocumentSnapshot successfully deleted!") }
+            .addOnFailureListener { e -> Log.w("DELETE", "Error deleting document", e) }
+    }
+
     sealed interface ConUIState {
         object Init : ConUIState
 

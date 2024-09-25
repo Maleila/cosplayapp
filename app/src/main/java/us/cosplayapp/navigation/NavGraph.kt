@@ -59,7 +59,10 @@ fun NavGraph (
             )) {
             val con = it.arguments?.getString("con")
             if (con != null) {
-                ConDetails(con)
+                ConDetails(con,
+                    onNavigateToConScreen = {
+                        navController.navigate(Screen.Cons.route)
+                })
             }
         }
     }
