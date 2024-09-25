@@ -14,8 +14,13 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.googlefonts.Font
+import androidx.compose.ui.text.googlefonts.GoogleFont
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import us.cosplayapp.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -24,6 +29,7 @@ fun HomeScreen(
     onNavigateToCosplayScreen: () -> Unit,
     onNavigateToConScreen: () -> Unit
 ) {
+
     Scaffold(
         topBar = {
             Column(
@@ -32,8 +38,12 @@ fun HomeScreen(
                     .padding(40.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Text(text = "Cosplay app yippee",
+                Text(text = "Cosplay",
                     style = MaterialTheme.typography.titleLarge)
+                Text(text = "Planner",
+                    style = MaterialTheme.typography.titleLarge)
+                Text(text = "100",
+                    style = MaterialTheme.typography.titleSmall)
             }
         },
         bottomBar = {

@@ -151,7 +151,7 @@ fun CosplayDetails(cosplay: CosplayWithId,
         horizontalArrangement = Arrangement.Center) {
         Text(
             text = cosplay.cosplay.character,
-            style = MaterialTheme.typography.titleLarge,
+            style = MaterialTheme.typography.titleMedium,
             modifier = Modifier.padding(10.dp),
             color = charTextColor
         )

@@ -81,7 +81,7 @@ fun ConScreen(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Text(text = "Cons",
-                    style = MaterialTheme.typography.titleLarge)
+                    style = MaterialTheme.typography.titleMedium)
             }
         },
         floatingActionButton = {

@@ -87,7 +87,7 @@ fun CosplayScreen(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Text(text = "Cosplays",
-                    style = MaterialTheme.typography.titleLarge)
+                    style = MaterialTheme.typography.titleMedium)
             }
         },
         floatingActionButton = {
