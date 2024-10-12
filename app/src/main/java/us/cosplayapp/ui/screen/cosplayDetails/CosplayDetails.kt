@@ -206,10 +206,13 @@ fun CosplayDetails(cosplay: CosplayWithId,
     )
     FlowRow() {
         cosplay.cosplay.consList.forEach { con ->
-            Button(onClick = { /*TODO*/ },
-                modifier = Modifier.padding(5.dp)) {
-                Text(text = con)
+            if(con.trim() != "") {
+                Button(onClick = { /*TODO*/ },
+                    modifier = Modifier.padding(5.dp)) {
+                    Text(text = con)
+                }
             }
+
         }
     }
     Icon(
