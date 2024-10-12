@@ -227,8 +227,6 @@ fun AddDialogue(
     cosplayViewModel: CosplayViewModel,
     onDialogDismiss: () -> Unit = {}
 ) {
-    //code from https://developer.android.com/develop/ui/compose/components/datepickers
-
     Dialog(
         onDismissRequest = onDialogDismiss
     ) {
@@ -243,15 +241,15 @@ fun AddDialogue(
 
         //TODO can't remember why this isn't a pre-defined list...?
         var mediaType by rememberSaveable {
-            mutableStateOf("")
+            mutableStateOf("Other")
         }
 
         var progress by rememberSaveable {
-            mutableStateOf("")
+            mutableStateOf("Not started")
         }
 
         var complexity by rememberSaveable {
-            mutableStateOf("")
+            mutableStateOf("Medium")
         }
 
         var notes by rememberSaveable {
