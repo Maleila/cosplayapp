@@ -28,6 +28,13 @@ fun NavGraph (
                 },
                 onNavigateToConScreen = {
                     navController.navigate(Screen.Cons.route)
+                },
+                onNavigateToConDetails = { con ->
+                    navController.navigate("conDetails/$con")
+
+                },
+                onNavigateToCosplayDetails = { character ->
+                    navController.navigate("cosplayDetails/$character")
                 }
             )
         }
