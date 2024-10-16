@@ -70,7 +70,7 @@ class HomeViewModel: ViewModel() {
     }
 
     fun getUpcomingCons(date: String): Boolean {
-
+    //inspired by answers from https://stackoverflow.com/questions/10774871/best-way-to-compare-dates-in-android
         val toDayCalendar = Calendar.getInstance()
         val date1 = toDayCalendar.time
 
