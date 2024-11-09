@@ -1,5 +1,7 @@
 package us.cosplayapp.ui.screen.cosplay
 
+import android.net.Uri
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -51,6 +53,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.Popup
 import androidx.lifecycle.viewmodel.compose.viewModel
+import coil.compose.rememberAsyncImagePainter
+import com.google.firebase.storage.FirebaseStorage
 import us.cosplayapp.Cosplay.Cosplay
 import us.cosplayapp.Cosplay.CosplayWithId
 import us.cosplayapp.navigation.Screen
@@ -163,6 +167,24 @@ fun CosplayScreen(
         }
     }
 
+@Composable
+fun StoredImage(storageReference: String) {
+    var imageUri by remember { mutableStateOf<Uri?>(null) }
+
+    FirebaseStorage.getInstance().getReference(storageReference).downloadUrl.addOnSuccessListener { uri ->
+        imageUri = uri
+    }
+
+    imageUri?.let {
+        Image(
+            painter = rememberAsyncImagePainter(it),
+            contentDescription = "Image from Firebase Storage",
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(200.dp)
+        )
+    }
+}
 
 @Composable
 fun CosplayCard(

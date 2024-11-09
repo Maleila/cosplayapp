@@ -31,20 +31,38 @@ class CosplayDetailsViewModel : ViewModel(
 
         imageUri?.let { uri ->
             val storageRef = FirebaseStorage.getInstance().reference
-            val imageRef = storageRef.child("images").child("ace books.jpg")
+            val imageRef = storageRef.child("images/${id}/${uri.lastPathSegment}")
             Log.d("IMAGE", imageRef.toString())
             Log.d("IMAGE", uri!!.toString())
             val uploadTask = imageRef.putFile(uri)
 
-            uploadTask.addOnSuccessListener {
-                // Image upload successful
-                //Toast.makeText(LocalContext.current,"Image uploaded successfully!", Toast.LENGTH_SHORT).show()
-                Log.d("IMAGE", "image uploaded!")
-            }.addOnFailureListener { e ->
-                // Image upload failed
-                //Toast.makeText(application, "Image upload failed: $e", Toast.LENGTH_SHORT).show()
-                Log.d("IMAGE", "image upload issue")
+            val urlTask = uploadTask.continueWithTask { task ->
+                if (!task.isSuccessful) {
+                    task.exception?.let {
+                        throw it
+                    }
+                }
+                imageRef.downloadUrl
+            }.addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    val downloadUri = task.result
+                    Log.d("IMAGE", "image uploaded!")
+                } else {
+                    // Handle failures
+                    // ...
+                    Log.d("IMAGE", "image upload issue")
+                }
             }
+
+//            uploadTask.addOnSuccessListener {
+//                // Image upload successful
+//                //Toast.makeText(LocalContext.current,"Image uploaded successfully!", Toast.LENGTH_SHORT).show()
+//
+//            }.addOnFailureListener { e ->
+//                // Image upload failed
+//                //Toast.makeText(application, "Image upload failed: $e", Toast.LENGTH_SHORT).show()
+//                Log.d("IMAGE", "image upload issue")
+//            }
         }
     }
 
