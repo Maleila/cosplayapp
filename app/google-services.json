@@ -2,7 +2,7 @@
   "project_info": {
     "project_number": "125367065379",
     "project_id": "cosplayapp-a61a1",
-    "storage_bucket": "cosplayapp-a61a1.appspot.com"
+    "storage_bucket": "cosplayapp-a61a1.firebasestorage.app"
   },
   "client": [
     {
