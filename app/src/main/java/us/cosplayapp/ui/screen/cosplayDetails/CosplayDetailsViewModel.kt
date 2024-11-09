@@ -1,8 +1,16 @@
 package us.cosplayapp.ui.screen.cosplayDetails
 
+import android.net.Uri
 import android.util.Log
+import android.widget.Toast
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.ViewModel
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.storage.FirebaseStorage
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.callbackFlow
 import us.cosplayapp.Con.Con
@@ -15,6 +23,29 @@ class CosplayDetailsViewModel : ViewModel(
 ) {
     companion object {
         const val COLLECTION_COSPLAYS = "cosplays"  //where to look in the database
+    }
+
+    var imageUri by mutableStateOf<Uri?>(null)
+
+    fun uploadImage(id: String) {
+
+        imageUri?.let { uri ->
+            val storageRef = FirebaseStorage.getInstance().reference
+            val imageRef = storageRef.child("images").child("ace books.jpg")
+            Log.d("IMAGE", imageRef.toString())
+            Log.d("IMAGE", uri!!.toString())
+            val uploadTask = imageRef.putFile(uri)
+
+            uploadTask.addOnSuccessListener {
+                // Image upload successful
+                //Toast.makeText(LocalContext.current,"Image uploaded successfully!", Toast.LENGTH_SHORT).show()
+                Log.d("IMAGE", "image uploaded!")
+            }.addOnFailureListener { e ->
+                // Image upload failed
+                //Toast.makeText(application, "Image upload failed: $e", Toast.LENGTH_SHORT).show()
+                Log.d("IMAGE", "image upload issue")
+            }
+        }
     }
 
     fun cosList() = callbackFlow {

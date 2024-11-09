@@ -1,5 +1,8 @@
 package us.cosplayapp.ui.screen.cosplayDetails
 
+import android.net.Uri
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -271,6 +274,16 @@ fun CosplayDetails(cosplay: CosplayWithId,
             cosplayDetailsViewModel.deleteChecklistItem(cosplay, index)
         }
     )
+    ImagePicker { uri ->
+        cosplayDetailsViewModel.imageUri = uri
+    }
+    if(cosplayDetailsViewModel.imageUri != null) {
+        Button(onClick = {
+        cosplayDetailsViewModel.uploadImage(cosplay.cosId)
+        }) {
+            Text(text = "add photo")
+        }
+    }
 }
 
 @Composable
@@ -431,6 +444,21 @@ fun CheckList(cosplay: CosplayWithId,
                 },
             tint = Color.White
         )
+    }
+}
+
+//code from https://medium.com/@emmanuelmuturia/how-to-add-and-retrieve-images-from-firebase-storage-using-jetpack-compose-dedda31ff66d
+@Composable
+fun ImagePicker(onImageSelected: (Uri) -> Unit) {
+    val launcher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent(),
+        onResult = { uri: Uri? -> uri?.let { onImageSelected(it) } }
+    )
+
+    Button(
+        onClick = { launcher.launch("image/*") }
+    ) {
+        Text("Select Image")
     }
 }
 

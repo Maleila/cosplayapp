@@ -2,7 +2,6 @@ plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
     id("com.google.gms.google-services")
-    //id("com.google.gms.google-services")
 }
 
 android {
@@ -84,4 +83,12 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.2.1")
 
     implementation("androidx.compose.ui:ui-text-google-fonts:1.7.0")
+    implementation("com.google.firebase:firebase-storage:21.0.1")
+
+//    // Import the BoM for the Firebase platform
+//    implementation(platform("com.google.firebase:firebase-bom:33.5.1"))
+//
+//    // Add the dependency for the Cloud Storage library
+//    // When using the BoM, you don't specify versions in Firebase library dependencies
+//    implementation("com.google.firebase:firebase-storage")
 }
