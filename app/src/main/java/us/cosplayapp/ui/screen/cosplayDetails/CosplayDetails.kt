@@ -53,7 +53,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.rememberAsyncImagePainter
-import com.google.firebase.storage.FirebaseStorage
 import us.cosplayapp.Con.ConWithId
 import us.cosplayapp.Cosplay.Cosplay
 import us.cosplayapp.Cosplay.CosplayWithId
@@ -278,7 +277,7 @@ fun CosplayDetails(cosplay: CosplayWithId,
             cosplayDetailsViewModel.deleteChecklistItem(cosplay, index)
         }
     )
-    FlowRow() {
+    FlowRow() {//idk if flowrow is ideal for this
         cosplay.cosplay.referencePics.forEach { pic ->
             if(pic.trim() != "") {
                 StoredImage(pic)
@@ -550,21 +549,13 @@ fun AddConDialogue(
 
 @Composable
 fun StoredImage(uri: String) {
-//    var imageUri by remember { mutableStateOf<Uri?>(null) }
-//
-//    FirebaseStorage.getInstance().getReference(storageReference).downloadUrl.addOnSuccessListener { uri ->
-//        imageUri = uri
-//    }
-
-    //actually I think I'm sending in the downloadUrl already
-
     Uri.parse(uri)?.let {
         Image(
             painter = rememberAsyncImagePainter(it),
             contentDescription = "Image from Firebase Storage",
             modifier = Modifier
-                .fillMaxWidth()
                 .height(200.dp)
+                .padding(5.dp)
         )
     }
 }
