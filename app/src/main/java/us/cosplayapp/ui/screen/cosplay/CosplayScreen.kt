@@ -168,25 +168,6 @@ fun CosplayScreen(
     }
 
 @Composable
-fun StoredImage(storageReference: String) {
-    var imageUri by remember { mutableStateOf<Uri?>(null) }
-
-    FirebaseStorage.getInstance().getReference(storageReference).downloadUrl.addOnSuccessListener { uri ->
-        imageUri = uri
-    }
-
-    imageUri?.let {
-        Image(
-            painter = rememberAsyncImagePainter(it),
-            contentDescription = "Image from Firebase Storage",
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(200.dp)
-        )
-    }
-}
-
-@Composable
 fun CosplayCard(
     cosplay: Cosplay,
     onCardClicked: () -> Unit = {}

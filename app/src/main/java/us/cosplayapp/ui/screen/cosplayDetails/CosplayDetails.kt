@@ -3,6 +3,7 @@ package us.cosplayapp.ui.screen.cosplayDetails
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -14,6 +15,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.BasicTextField
@@ -50,6 +52,8 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.viewmodel.compose.viewModel
+import coil.compose.rememberAsyncImagePainter
+import com.google.firebase.storage.FirebaseStorage
 import us.cosplayapp.Con.ConWithId
 import us.cosplayapp.Cosplay.Cosplay
 import us.cosplayapp.Cosplay.CosplayWithId
@@ -274,12 +278,20 @@ fun CosplayDetails(cosplay: CosplayWithId,
             cosplayDetailsViewModel.deleteChecklistItem(cosplay, index)
         }
     )
+    FlowRow() {
+        cosplay.cosplay.referencePics.forEach { pic ->
+            if(pic.trim() != "") {
+                StoredImage(pic)
+            }
+
+        }
+    }
     ImagePicker { uri ->
         cosplayDetailsViewModel.imageUri = uri
     }
     if(cosplayDetailsViewModel.imageUri != null) {
         Button(onClick = {
-        cosplayDetailsViewModel.uploadImage(cosplay.cosId)
+        cosplayDetailsViewModel.uploadImage(cosplay)
         }) {
             Text(text = "add photo")
         }
@@ -533,6 +545,27 @@ fun AddConDialogue(
                 Text(text = "Add")
             }
         }
+    }
+}
+
+@Composable
+fun StoredImage(uri: String) {
+//    var imageUri by remember { mutableStateOf<Uri?>(null) }
+//
+//    FirebaseStorage.getInstance().getReference(storageReference).downloadUrl.addOnSuccessListener { uri ->
+//        imageUri = uri
+//    }
+
+    //actually I think I'm sending in the downloadUrl already
+
+    Uri.parse(uri)?.let {
+        Image(
+            painter = rememberAsyncImagePainter(it),
+            contentDescription = "Image from Firebase Storage",
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(200.dp)
+        )
     }
 }
 

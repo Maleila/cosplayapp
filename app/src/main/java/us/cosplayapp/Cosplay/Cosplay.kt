@@ -10,7 +10,8 @@ data class Cosplay(
     var notes: String = "",
     var toDo: List<String> = listOf(""),
     var checklist: List<String> = listOf(""),
-    var consList: List<String> = listOf("")
+    var consList: List<String> = listOf(""),
+    var referencePics: List<String> = listOf("")
 )
 
 data class CosplayWithId(

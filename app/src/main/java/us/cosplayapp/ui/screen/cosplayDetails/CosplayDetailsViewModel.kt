@@ -27,11 +27,10 @@ class CosplayDetailsViewModel : ViewModel(
 
     var imageUri by mutableStateOf<Uri?>(null)
 
-    fun uploadImage(id: String) {
-
+    fun uploadImage(cos: CosplayWithId) {
         imageUri?.let { uri ->
             val storageRef = FirebaseStorage.getInstance().reference
-            val imageRef = storageRef.child("images/${id}/${uri.lastPathSegment}")
+            val imageRef = storageRef.child("images/${cos.cosId}/${uri.lastPathSegment}")
             Log.d("IMAGE", imageRef.toString())
             Log.d("IMAGE", uri!!.toString())
             val uploadTask = imageRef.putFile(uri)
@@ -46,6 +45,7 @@ class CosplayDetailsViewModel : ViewModel(
             }.addOnCompleteListener { task ->
                 if (task.isSuccessful) {
                     val downloadUri = task.result
+                    addPic(downloadUri, cos)
                     Log.d("IMAGE", "image uploaded!")
                 } else {
                     // Handle failures
@@ -53,16 +53,6 @@ class CosplayDetailsViewModel : ViewModel(
                     Log.d("IMAGE", "image upload issue")
                 }
             }
-
-//            uploadTask.addOnSuccessListener {
-//                // Image upload successful
-//                //Toast.makeText(LocalContext.current,"Image uploaded successfully!", Toast.LENGTH_SHORT).show()
-//
-//            }.addOnFailureListener { e ->
-//                // Image upload failed
-//                //Toast.makeText(application, "Image upload failed: $e", Toast.LENGTH_SHORT).show()
-//                Log.d("IMAGE", "image upload issue")
-//            }
         }
     }
 
@@ -142,6 +132,19 @@ class CosplayDetailsViewModel : ViewModel(
                 "consList" to newConsList))
             .addOnSuccessListener { Log.d("tag", "con successfully added!") }
             .addOnFailureListener { e -> Log.w("Error adding con", e) }
+    }
+
+    fun addPic(pic: Uri, cosplay: CosplayWithId) {
+        var newPicsList: MutableList<String> = cosplay.cosplay.referencePics.toMutableList()
+        newPicsList.add(pic.toString())
+        if(newPicsList[0] == "") {
+            newPicsList.removeAt(0)
+        }
+        FirebaseFirestore.getInstance().collection(COLLECTION_COSPLAYS).document(cosplay.cosId)
+            .update(mapOf(
+                "referencePics" to newPicsList))
+            .addOnSuccessListener { Log.d("tag", "URI successfully added!") }
+            .addOnFailureListener { e -> Log.w("Error adding image URI", e) }
     }
 
     fun changeToDoStatus(cosplay: CosplayWithId, toDo: String, checked: Boolean, index: Int) {
