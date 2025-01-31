@@ -4,7 +4,8 @@ data class Con(
     var uid: String = "",
     var name: String = "",
     var dates: List<String> = listOf(""),
-    var location: String = ""
+    var location: String = "",
+    var cosplans: List<String> = listOf("")
 )
 
 data class ConWithId(

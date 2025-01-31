@@ -8,6 +8,7 @@ import kotlinx.coroutines.flow.callbackFlow
 import us.cosplayapp.Con.Con
 import us.cosplayapp.Con.ConWithId
 import us.cosplayapp.Cosplay.Cosplay
+import us.cosplayapp.Cosplay.CosplayWithId
 import us.cosplayapp.ui.screen.cosplayDetails.CosplayDetailsViewModel
 
 class ConDetailsViewModel: ViewModel() {
@@ -33,6 +34,32 @@ class ConDetailsViewModel: ViewModel() {
                         )
                     } else {
                         ConUIState.Error(e?.message.toString())
+                    }
+
+                    trySend(response) // emit this value through the flow
+                }
+        awaitClose {
+            snapshotListener.remove()
+        }
+    }
+
+    fun cosList() = callbackFlow {
+        val snapshotListener =
+            FirebaseFirestore.getInstance().collection("cosplays")
+                .addSnapshotListener() { snapshot, e ->
+                    val response = if (snapshot != null) {
+                        val cosList = snapshot.toObjects(Cosplay::class.java)
+                        var cosWithIdList = mutableListOf<CosplayWithId>()
+
+                        cosList.forEachIndexed { index, cos ->
+                            cosWithIdList.add(CosplayWithId(snapshot.documents[index].id, cos))
+                        }
+
+                        CosplayUIState.Success(
+                            cosWithIdList
+                        )
+                    } else {
+                        CosplayUIState.Error(e?.message.toString())
                     }
 
                     trySend(response) // emit this value through the flow
@@ -72,11 +99,44 @@ class ConDetailsViewModel: ViewModel() {
             .addOnFailureListener { e -> Log.w("DELETE", "Error deleting document", e) }
     }
 
+    fun getCosplaysList(cons: List<CosplayWithId>): List<String> {
+        var cosplayList = mutableListOf<String>()
+
+        cons.forEach {
+            cosplayList.add(it.cosplay.character)
+        }
+
+        return cosplayList
+    }
+
+    fun addCosplan(con: ConWithId, cosplay: String) {
+        var newCosplanList: MutableList<String>
+                = con.con.cosplans.toMutableList()
+        newCosplanList.add(cosplay)
+        //not a great fix cause this only removes this after someone clicks the add button
+        if(newCosplanList[0] == "") {
+            newCosplanList.removeAt(0)
+        }
+
+        FirebaseFirestore.getInstance().collection(ConDetailsViewModel.COLLECTION_CONS).document(con.conId)
+            .update(mapOf(
+                "cosplans" to newCosplanList))
+            .addOnSuccessListener { Log.d("COSPLANS", "cosplan successfully added!") }
+            .addOnFailureListener { e -> Log.w("Error adding cosplan :'(", e) }
+    }
+
     sealed interface ConUIState {
         object Init : ConUIState
 
         data class Success(val conList: List<ConWithId>) : ConUIState
         data class Error(val error: String?) : ConUIState
+    }
+
+    sealed interface CosplayUIState {
+        object Init : CosplayUIState
+
+        data class Success(val cosList: List<CosplayWithId>) : CosplayUIState
+        data class Error(val error: String?) : CosplayUIState
     }
 }
 

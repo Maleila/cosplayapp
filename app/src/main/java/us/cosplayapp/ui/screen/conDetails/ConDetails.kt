@@ -4,11 +4,16 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AddCircleOutline
+import androidx.compose.material.icons.filled.CalendarMonth
+import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -33,7 +38,9 @@ import org.intellij.lang.annotations.JdkConstants.HorizontalAlignment
 import us.cosplayapp.Con.Con
 import us.cosplayapp.Con.ConWithId
 import us.cosplayapp.Cosplay.Cosplay
+import us.cosplayapp.Cosplay.CosplayWithId
 import us.cosplayapp.ui.screen.cosplay.Dropdown
+import us.cosplayapp.ui.screen.cosplayDetails.AddConDialogue
 import us.cosplayapp.ui.screen.cosplayDetails.CosplayDetailsViewModel
 
 @Composable
@@ -46,11 +53,18 @@ fun ConDetails(
     val conListState = conDetailsViewModel.conList().collectAsState(
         initial = ConDetailsViewModel.ConUIState.Init )
 
+    val cosListState = conDetailsViewModel.cosList().collectAsState(
+        initial = ConDetailsViewModel.CosplayUIState.Init)
+
     var showEditDialog by rememberSaveable {
         mutableStateOf(false)
     }
 
     var isDeleted by rememberSaveable {
+        mutableStateOf(false)
+    }
+
+    var showAddCosplanDialogue by rememberSaveable {
         mutableStateOf(false)
     }
 
@@ -73,9 +87,9 @@ fun ConDetails(
                     onEditCon = { con ->
                         showEditDialog = true
                     },
-//                onAddCon = {
-//                    showAddConDialogue = true
-//                },
+                onAddCosplan = {
+                    showAddCosplanDialogue = true
+                },
                     conDetailsViewModel
                 )
             } else {
@@ -99,14 +113,28 @@ fun ConDetails(
                     }
                 )
             }
+            if(showAddCosplanDialogue) {
+                AddCosplanDialogue(
+                    (cosListState.value as ConDetailsViewModel.CosplayUIState.Success).cosList,
+                    con = ConWithId(id,
+                        conDetailsViewModel.getConById(
+                            id,
+                            (conListState.value as ConDetailsViewModel.ConUIState.Success).conList
+                        )),
+                    conDetailsViewModel = conDetailsViewModel,
+                    {
+                        showAddCosplanDialogue = false
+                    })
+            }
         }
     }
 }
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun ConDetails(con: ConWithId,
                onEditCon: (ConWithId) -> Unit = {},
-//               onAddCon: () -> Unit = {},
+               onAddCosplan: () -> Unit = {},
                conDetailsViewModel: ConDetailsViewModel) {
     Column(modifier = Modifier.padding(10.dp)) {
         Row(modifier = Modifier.fillMaxWidth(),
@@ -123,8 +151,103 @@ fun ConDetails(con: ConWithId,
                 tint = Color.White
             )
         }
-        Text(text = con.con.location)
-        Text(text = con.con.dates[0] + " - " + con.con.dates[1])
+        Row(
+            verticalAlignment = Alignment.CenterVertically
+        ){
+            Icon(imageVector = Icons.Filled.LocationOn,
+                contentDescription = "location marker",
+                modifier = Modifier.clickable {
+                    onEditCon(con)
+                },
+                tint = Color.White)
+            Text(
+                text = con.con.location,
+                modifier = Modifier.padding(10.dp))
+        }
+        Row(
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(imageVector = Icons.Filled.CalendarMonth,
+                contentDescription = "date",
+                modifier = Modifier.clickable {
+                    onEditCon(con)
+                },
+                tint = Color.White)
+            Text(
+                text = con.con.dates[0] + " - " + con.con.dates[1],
+                modifier = Modifier.padding(10.dp))
+        }
+        Text(
+            text = "Cosplans",
+            style = MaterialTheme.typography.bodyLarge,
+            //modifier = Modifier.padding(10.dp)
+        )
+        FlowRow() {
+            con.con.cosplans.forEach { cos ->
+                if(cos.trim() != "") {
+                    Button(onClick = { /*TODO*/ },
+                        modifier = Modifier.padding(5.dp)) {
+                        Text(text = cos)
+                    }
+                }
+
+            }
+        }
+        Icon(
+            imageVector = Icons.Filled.AddCircleOutline,
+            contentDescription = "add cos",
+            modifier = Modifier
+                .padding(12.dp)
+                .clickable {
+                    onAddCosplan()
+                },
+            tint = Color.White
+        )
+    }
+}
+
+@Composable
+fun AddCosplanDialogue(
+    cosplays: List<CosplayWithId>,
+    con: ConWithId,
+    conDetailsViewModel: ConDetailsViewModel,
+    onDialogDismiss: () -> Unit = {}
+) {
+    Dialog(onDismissRequest = {
+        onDialogDismiss
+    }) {
+        var cosList by rememberSaveable {
+            mutableStateOf(conDetailsViewModel.getCosplaysList(cosplays))
+        }
+
+        var cos by rememberSaveable {
+            mutableStateOf(cosList[0])
+        }
+        Column(
+            Modifier
+                .background(
+                    color = MaterialTheme.colorScheme.secondaryContainer,
+                    shape = MaterialTheme.shapes.medium
+                )
+                .padding(10.dp)
+        ) {
+            Text(text = "Cosplay", modifier = Modifier.padding(horizontal = 10.dp))
+            Dropdown(
+                list = cosList,
+                preselected = cosList[0],
+                onSelectionChanged = {
+                    cos = it
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(10.dp))
+            Button(onClick = {
+                conDetailsViewModel.addCosplan(con, cos)
+                onDialogDismiss()
+            }) {
+                Text(text = "Add")
+            }
+        }
     }
 }
 

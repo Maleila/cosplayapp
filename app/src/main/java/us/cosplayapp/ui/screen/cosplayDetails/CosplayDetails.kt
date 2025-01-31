@@ -25,6 +25,7 @@ import androidx.compose.material.icons.filled.AddCircleOutline
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.Speed
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Checkbox
@@ -189,11 +190,21 @@ fun CosplayDetails(cosplay: CosplayWithId,
             )
         }
     }
-    Text(
-        text = cosplay.cosplay.complexity,
-        style = MaterialTheme.typography.bodyMedium,
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier.padding(10.dp)
-    )
+    ) {
+        Icon(
+            imageVector = Icons.Filled.Speed,
+            contentDescription = "complexity",
+            tint = Color.White)
+        Text(
+            text = cosplay.cosplay.complexity,
+            style = MaterialTheme.typography.bodyMedium,
+            modifier = Modifier.padding(10.dp)
+        )
+    }
+
     Spacer(modifier = Modifier.fillMaxHeight(0.02f))
     Text(
         text = "Notes",
@@ -206,7 +217,7 @@ fun CosplayDetails(cosplay: CosplayWithId,
         modifier = Modifier.padding(10.dp)
     )
     Text(
-        text = "Cons Appearances",
+        text = "Con Appearances",
         style = MaterialTheme.typography.bodyLarge,
         modifier = Modifier.padding(10.dp)
     )
@@ -338,7 +349,6 @@ fun CheckList(cosplay: CosplayWithId,
                         //can't use the same textfield bc one needs to be the actual to-do
                         //so it updates w the database
                         //and one needs to be a local var that the user can modify
-                        //unless I can get the local var to listen for changes to the to-do...
                         if(!itemModifiable) {
                             BasicTextField(
                                 value = item.substring(1),

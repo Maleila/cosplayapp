@@ -69,16 +69,27 @@ class HomeViewModel: ViewModel() {
         }
     }
 
-    fun getUpcomingCons(date: String): Boolean {
+    fun getUpcomingCons(cons: List<ConWithId>): List<ConWithId> {
+        var upcomingCons = mutableListOf<ConWithId>()
+        cons.forEach {
+            if(checkConDate(it.con.dates.first())) {
+                upcomingCons.add(it)
+            }
+        }
+        return upcomingCons
+    }
+
+    //rewrite this to return a list instead
+    fun checkConDate(date: String): Boolean {
     //inspired by answers from https://stackoverflow.com/questions/10774871/best-way-to-compare-dates-in-android
         val toDayCalendar = Calendar.getInstance()
-        val date1 = toDayCalendar.time
+        val today = toDayCalendar.time
 
         val tomorrowCalendar: Calendar = Calendar.getInstance()
-        tomorrowCalendar.add(Calendar.DAY_OF_MONTH, 30)
-        val date2 = tomorrowCalendar.time
+        tomorrowCalendar.add(Calendar.DAY_OF_MONTH, 90)
+        val window = tomorrowCalendar.time
 
-        Log.d("UPCOMING CONS", date2.toString())
+        Log.d("UPCOMING CONS", window.toString())
 
         Log.d("UPCOMING CONS", date)
 
@@ -89,7 +100,7 @@ class HomeViewModel: ViewModel() {
         } catch (e: ParseException) {
             e.printStackTrace()
         }
-        if (conDate!!.before(date2) && conDate!!.after(date1)) {
+        if (conDate!!.before(window) && conDate!!.after(today)) {
             return true
         }
 

@@ -3,7 +3,6 @@ package us.cosplayapp.ui.screen.home
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -21,18 +20,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.font.FontFamily
-import androidx.compose.ui.text.googlefonts.Font
-import androidx.compose.ui.text.googlefonts.GoogleFont
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import us.cosplayapp.R
+import us.cosplayapp.Con.ConWithId
 import us.cosplayapp.ui.screen.cons.ConCard
-import us.cosplayapp.ui.screen.cons.ConUploadUiState
 import us.cosplayapp.ui.screen.cosplay.CosplayCard
-import us.cosplayapp.ui.screen.cosplay.CosplayUploadUiState
-import us.cosplayapp.ui.screen.cosplayDetails.CosplayDetailsViewModel
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
@@ -108,12 +100,17 @@ fun HomeScreen(
                     )
                 } else {
                     LazyColumn() {
-                        items((conListState.value as HomeViewModel.ConUIState.Success).conList) {
-                            if(homeViewModel.getUpcomingCons(it.con.dates.first())) {
+                        var upcomingCons: List<ConWithId> = homeViewModel.getUpcomingCons((conListState.value as HomeViewModel.ConUIState.Success).conList)
+                        if(upcomingCons.isEmpty()) {
+//                            Text(text = "No cons in the next 90 days",
+//                                modifier = Modifier.padding(10.dp))
+                        } else {
+                            items(upcomingCons) {
                                 ConCard(con = it.con,
                                     onCardClicked = { onNavigateToConDetails(it.conId) })
                             }
                         }
+
                     }
                 }
             }

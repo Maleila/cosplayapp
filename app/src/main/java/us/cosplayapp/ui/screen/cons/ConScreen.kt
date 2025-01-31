@@ -205,7 +205,8 @@ fun ConDatesPicker(
             state = dateRangePickerState,
             title = {
                 Text(
-                    text = "Select date range"
+                    text = "Select date range",
+                    style = MaterialTheme.typography.labelSmall
                 )
             },
             showModeToggle = false,
