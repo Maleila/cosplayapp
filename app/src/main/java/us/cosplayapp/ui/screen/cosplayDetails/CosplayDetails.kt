@@ -1,17 +1,21 @@
 package us.cosplayapp.ui.screen.cosplayDetails
 
 import android.net.Uri
+import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -48,6 +52,9 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.input.key.key
+import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
@@ -58,6 +65,7 @@ import us.cosplayapp.Con.ConWithId
 import us.cosplayapp.Cosplay.Cosplay
 import us.cosplayapp.Cosplay.CosplayWithId
 import us.cosplayapp.ui.screen.cosplay.Dropdown
+import androidx.compose.ui.input.pointer.pointerInput
 
 @Composable
 
@@ -81,6 +89,9 @@ fun CosplayDetails(
         mutableStateOf(false)
     }
 
+    var activeUri by rememberSaveable {
+        mutableStateOf<Uri?>(null)
+    }
     Column(modifier = Modifier
         .fillMaxSize()
         .padding(10.dp)
@@ -103,6 +114,9 @@ fun CosplayDetails(
                 onAddCon = {
                     showAddConDialogue = true
                 },
+                onImageClicked = {  photo ->
+                    activeUri = photo
+                },
                 cosplayDetailsViewModel
             )
 
@@ -118,6 +132,7 @@ fun CosplayDetails(
                     showEditDialog = false
                 }
             }
+
             if(showAddConDialogue) {
                 AddConDialogue(
                     cosplay = CosplayWithId(id,
@@ -133,6 +148,14 @@ fun CosplayDetails(
             }
         }
     }
+
+    if (cosplayListState.value == CosplayDetailsViewModel.CosplayDetailsUIState.Init) {
+        Text(text = "loading")
+    } else {
+        if (activeUri != null) {
+            FullScreenImage(activeUri!!) { activeUri = null }
+        }
+    }
 }
 
 @OptIn(ExperimentalLayoutApi::class, ExperimentalMaterial3Api::class)
@@ -140,6 +163,7 @@ fun CosplayDetails(
 fun CosplayDetails(cosplay: CosplayWithId,
                    onEditCosplay: (Cosplay) -> Unit = {},
                    onAddCon: () -> Unit = {},
+                   onImageClicked: (Uri) -> Unit,
                    cosplayDetailsViewModel: CosplayDetailsViewModel)
 {
     var charTextColor: Color = when (cosplay.cosplay.progress) {
@@ -288,10 +312,10 @@ fun CosplayDetails(cosplay: CosplayWithId,
             cosplayDetailsViewModel.deleteChecklistItem(cosplay, index)
         }
     )
-    FlowRow() {//idk if flowrow is ideal for this
+    FlowRow() {//idk if flowrow is ideal for this - maybe lazygrid?
         cosplay.cosplay.referencePics.forEach { pic ->
             if(pic.trim() != "") {
-                StoredImage(pic)
+                StoredImage(pic, onImageClicked)
             }
 
         }
@@ -558,7 +582,7 @@ fun AddConDialogue(
 }
 
 @Composable
-fun StoredImage(uri: String) {
+fun StoredImage(uri: String, onClick: (Uri) -> Unit) {
     Uri.parse(uri)?.let {
         Image(
             painter = rememberAsyncImagePainter(it),
@@ -566,7 +590,42 @@ fun StoredImage(uri: String) {
             modifier = Modifier
                 .height(200.dp)
                 .padding(5.dp)
+                .clickable {
+                    onClick(it)
+                }
         )
+    }
+}
+
+@Composable
+fun FullScreenImage(uri: Uri, onDismiss: () -> Unit) {
+    Box(
+        Modifier
+            .fillMaxSize(),
+        contentAlignment = Alignment.Center
+    ) {
+        Scrim(onDismiss, Modifier.fillMaxSize())
+        Image(
+            painter = rememberAsyncImagePainter(uri),
+            contentDescription = "Full-screen image",
+            modifier = Modifier.fillMaxSize()
+        )
+    }
+}
+
+@Composable
+fun Scrim(onDismiss: () -> Unit, modifier: Modifier) {
+    Box(modifier = modifier
+        .pointerInput(onDismiss) { detectTapGestures { onDismiss() } }
+        .onKeyEvent {
+            if (it.key == Key.Escape) {
+                onDismiss()
+                true
+            } else {
+                false
+            }
+        }
+        .background(Color.DarkGray.copy(alpha = 0.75f))) {
     }
 }
 

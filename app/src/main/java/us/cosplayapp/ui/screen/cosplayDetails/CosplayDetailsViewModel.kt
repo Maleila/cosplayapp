@@ -27,6 +27,8 @@ class CosplayDetailsViewModel : ViewModel(
 
     var imageUri by mutableStateOf<Uri?>(null)
 
+    var activeUri by mutableStateOf<Uri?>(null)
+
     fun uploadImage(cos: CosplayWithId) {
         imageUri?.let { uri ->
             val storageRef = FirebaseStorage.getInstance().reference
