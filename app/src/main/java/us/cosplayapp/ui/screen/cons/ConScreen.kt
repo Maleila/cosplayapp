@@ -2,6 +2,8 @@ package us.cosplayapp.ui.screen.cons
 
 import android.app.DatePickerDialog
 import android.icu.text.SimpleDateFormat
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.foundation.background
@@ -52,12 +54,18 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import androidx.compose.ui.window.Popup
 import androidx.lifecycle.viewmodel.compose.viewModel
 import us.cosplayapp.Con.Con
+import java.time.Instant
+import java.time.ZoneId
+import java.time.ZoneOffset
+import java.time.format.DateTimeFormatter
 import java.util.Date
 import java.util.Locale
 
+@RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ConScreen(
@@ -82,7 +90,7 @@ fun ConScreen(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Text(text = "Cons",
-                    style = MaterialTheme.typography.titleMedium)
+                    style = MaterialTheme.typography.displayMedium)
             }
         },
         floatingActionButton = {
@@ -170,6 +178,7 @@ fun ConCard(
     }
 }
 
+@RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ConDatesPicker(
@@ -190,7 +199,8 @@ fun ConDatesPicker(
                         )
                     )
                     onDismiss()
-                }
+                },
+                enabled = (dateRangePickerState.selectedEndDateMillis != null)
             ) {
                 Text("OK")
             }
@@ -203,21 +213,23 @@ fun ConDatesPicker(
     ) {
         DateRangePicker(
             state = dateRangePickerState,
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(500.dp),
             title = {
                 Text(
                     text = "Select date range",
-                    style = MaterialTheme.typography.labelSmall
+                    style = MaterialTheme.typography.labelSmall,
+                    modifier = Modifier.padding(10.dp)
                 )
             },
             showModeToggle = false,
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(500.dp)
-                .padding(16.dp)
+            requestFocus = true
         )
     }
 }
 
+@RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddDialogue(
@@ -227,9 +239,9 @@ fun AddDialogue(
     //code from https://developer.android.com/develop/ui/compose/components/datepickers
     var showDatePicker by remember { mutableStateOf(false) }
     val datePickerState = rememberDatePickerState()
-    val selectedDate = datePickerState.selectedDateMillis?.let {
-        convertMillisToDate(it)
-    } ?: ""
+//    val selectedDate = datePickerState.selectedDateMillis?.let {
+//        convertMillisToDate(it)
+//    } ?: ""
 
     var selectedDates by rememberSaveable {
         mutableStateOf<Pair<String?, String?>>(Pair("", ""))
@@ -338,34 +350,6 @@ fun AddDialogue(
                                           selectedDates = it
                     },
                     onDismiss = { showDatePicker = false })
-//                Popup(
-//                    onDismissRequest = { showDatePicker = false },
-//                    alignment = Alignment.TopStart
-//                ) {
-//                    Box(
-//                        modifier = Modifier
-//                            .fillMaxWidth()
-//                            .offset(y = 64.dp)
-//                            .shadow(elevation = 4.dp)
-//                            .background(MaterialTheme.colorScheme.surface)
-//                            .padding(16.dp)
-//                    ) {
-//                        DatePicker(
-//                            state = datePickerState,
-//                            showModeToggle = false
-//                        )
-//                        Row(
-//                            modifier = Modifier.fillMaxWidth(),
-//                            horizontalArrangement = Arrangement.End
-//                        ) {
-//                            Button(onClick =
-//                            { showDatePicker = false }) {
-//                                Text(text = "Select")
-//                            }
-//                        }
-//
-//                    }
-//                }
             }
             Text(text = "Location", modifier = Modifier.padding(horizontal = 10.dp))
             OutlinedTextField(
@@ -419,7 +403,16 @@ fun AddDialogue(
     }
 }
 
+//Based on this version: https://medium.com/@andyphiri92/working-with-date-picker-in-jetpack-compose-3ec6c2f65a5a
+@RequiresApi(Build.VERSION_CODES.O)
 fun convertMillisToDate(millis: Long): String {
-    val formatter = SimpleDateFormat("MM/dd/yyyy", Locale.getDefault())
-    return formatter.format(Date(millis))
+    val formatter = DateTimeFormatter.ofPattern("MM/dd/yyyy", Locale.getDefault())
+    val utcDateAtStartOfDay = Instant
+        .ofEpochMilli(millis)
+        .atZone(ZoneOffset.UTC)
+        .toLocalDate()
+
+    val localDate = utcDateAtStartOfDay.atStartOfDay(ZoneId.systemDefault())
+
+    return formatter.format(localDate)
 }

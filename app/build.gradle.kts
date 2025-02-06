@@ -78,7 +78,8 @@ dependencies {
     implementation("com.google.accompanist:accompanist-permissions:0.33.2-alpha")
     implementation("io.coil-kt:coil-compose:2.1.0")
 
-    implementation("androidx.compose.material3:material3:1.2.0-alpha05")
+    //implementation("androidx.compose.material3:material3:1.2.0-alpha05")
+    implementation("androidx.compose.material3:material3:1.4.0-alpha07")
 
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.7.3")
 

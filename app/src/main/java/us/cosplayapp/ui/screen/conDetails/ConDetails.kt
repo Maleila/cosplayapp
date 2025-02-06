@@ -140,7 +140,7 @@ fun ConDetails(con: ConWithId,
         Row(modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.Center) {
             Text(text = con.con.name,
-                style = MaterialTheme.typography.titleMedium,
+                style = MaterialTheme.typography.displayMedium,
                 modifier = Modifier.padding(10.dp))
             Icon(
                 imageVector = Icons.Filled.Settings,

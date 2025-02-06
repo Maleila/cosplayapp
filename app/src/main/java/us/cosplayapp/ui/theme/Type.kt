@@ -42,31 +42,44 @@ val Typography = Typography(
         color = Pink80
 ),
 titleLarge = TextStyle(
-    fontFamily = titleFamily,
+    fontFamily = FontFamily.Default,
     fontWeight = FontWeight.Normal,
-    fontSize = 50.sp,
-    lineHeight = 20.sp,
+    fontSize = 16.sp,
+    lineHeight = 24.sp,
     letterSpacing = 0.sp,
-    lineHeightStyle = LineHeightStyle(
-        alignment = LineHeightStyle.Alignment.Center,
-        trim = LineHeightStyle.Trim.Both
-    )
 ),
 titleMedium = TextStyle(
-    fontFamily = titleFamily,
+    fontFamily = FontFamily.Default,
     fontWeight = FontWeight.Normal,
-    fontSize = 48.sp,
-    lineHeight = 1.em,
-    letterSpacing = 0.sp,
-    lineHeightStyle = LineHeightStyle(
-        alignment = LineHeightStyle.Alignment.Center,
-        trim = LineHeightStyle.Trim.Both
-    )
+    fontSize = 16.sp,
+    lineHeight = 24.sp,
+    letterSpacing = 0.5.sp,
 ),
     titleSmall = TextStyle(
+        fontFamily = FontFamily.Default,
+        fontWeight = FontWeight.Normal,
+        fontSize = 16.sp,
+        lineHeight = 1.em,
+        letterSpacing = 0.sp,
+        lineHeightStyle = LineHeightStyle(
+            alignment = LineHeightStyle.Alignment.Center,
+            trim = LineHeightStyle.Trim.Both
+        )
+    ),
+    displayLarge = TextStyle(
         fontFamily = titleFamily,
         fontWeight = FontWeight.Normal,
-        fontSize = 130.sp,
+        fontSize = 50.sp,
+        lineHeight = 20.sp,
+        letterSpacing = 0.sp,
+        lineHeightStyle = LineHeightStyle(
+            alignment = LineHeightStyle.Alignment.Center,
+            trim = LineHeightStyle.Trim.Both
+        )),
+    displayMedium = TextStyle(
+        fontFamily = titleFamily,
+        fontWeight = FontWeight.Normal,
+        fontSize = 48.sp,
         lineHeight = 1.em,
         letterSpacing = 0.sp,
         lineHeightStyle = LineHeightStyle(

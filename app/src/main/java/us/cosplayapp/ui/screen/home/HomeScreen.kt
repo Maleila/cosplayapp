@@ -52,9 +52,9 @@ fun HomeScreen(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Text(text = "Cosplay",
-                    style = MaterialTheme.typography.titleLarge)
+                    style = MaterialTheme.typography.displayLarge)
                 Text(text = "Planner",
-                    style = MaterialTheme.typography.titleLarge)
+                    style = MaterialTheme.typography.displayLarge)
                 Text(text = "100",
                     style = MaterialTheme.typography.titleSmall)
             }
