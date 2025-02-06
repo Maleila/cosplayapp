@@ -9,10 +9,12 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -56,7 +58,7 @@ fun HomeScreen(
                 Text(text = "Planner",
                     style = MaterialTheme.typography.displayLarge)
                 Text(text = "100",
-                    style = MaterialTheme.typography.titleSmall)
+                    style = MaterialTheme.typography.displaySmall)
             }
         },
         bottomBar = {
@@ -89,8 +91,13 @@ fun HomeScreen(
             horizontalAlignment = Alignment.CenterHorizontally) {
             Text(text = "Upcoming cons")
             if (conListState.value == HomeViewModel.ConUIState.Init) {
-                Text(text = "loading",
-                    modifier = Modifier.padding(10.dp))
+                Text(
+                    text = "loading",
+                    modifier = Modifier.padding(10.dp)
+                )
+                LinearProgressIndicator(modifier = Modifier.width(75.dp),
+                    color = MaterialTheme.colorScheme.secondary,
+                    trackColor = MaterialTheme.colorScheme.surfaceVariant)
             } else if (conListState.value is HomeViewModel.ConUIState.Success) {
                 if ((conListState.value as HomeViewModel.ConUIState.Success).conList.isEmpty()
                 ) {
@@ -117,8 +124,13 @@ fun HomeScreen(
             Spacer(modifier = Modifier.fillMaxHeight(0.02f))
             Text(text = "Cosplays in progress")
             if (cosplayListState.value == HomeViewModel.CosplayUIState.Init) {
-                Text(text = "loading",
-                    modifier = Modifier.padding(10.dp))
+                Text(
+                    text = "loading",
+                    modifier = Modifier.padding(10.dp)
+                )
+                LinearProgressIndicator(modifier = Modifier.width(75.dp),
+                    color = MaterialTheme.colorScheme.secondary,
+                    trackColor = MaterialTheme.colorScheme.surfaceVariant)
             } else if (cosplayListState.value is HomeViewModel.CosplayUIState.Success) {
                 if ((cosplayListState.value as HomeViewModel.CosplayUIState.Success).cosList.isEmpty()
                 ) {

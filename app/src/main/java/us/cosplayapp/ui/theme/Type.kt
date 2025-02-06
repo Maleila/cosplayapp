@@ -86,6 +86,17 @@ titleMedium = TextStyle(
             alignment = LineHeightStyle.Alignment.Center,
             trim = LineHeightStyle.Trim.Both
         )
+    ),
+    displaySmall = TextStyle(
+        fontFamily = titleFamily,
+        fontWeight = FontWeight.Normal,
+        fontSize = 150.sp,
+        lineHeight = 1.em,
+        letterSpacing = 0.sp,
+        lineHeightStyle = LineHeightStyle(
+            alignment = LineHeightStyle.Alignment.Center,
+            trim = LineHeightStyle.Trim.Both
+        )
     )
 
 
