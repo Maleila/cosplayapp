@@ -79,7 +79,6 @@ class HomeViewModel: ViewModel() {
         return upcomingCons
     }
 
-    //rewrite this to return a list instead
     fun checkConDate(date: String): Boolean {
     //inspired by answers from https://stackoverflow.com/questions/10774871/best-way-to-compare-dates-in-android
         val toDayCalendar = Calendar.getInstance()

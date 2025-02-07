@@ -20,6 +20,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.DateRange
+import androidx.compose.material.icons.filled.FilterAlt
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material.icons.outlined.ArrowDropDown
 import androidx.compose.material.icons.rounded.Add
@@ -58,6 +59,7 @@ import androidx.compose.ui.window.Popup
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.rememberAsyncImagePainter
 import com.google.firebase.storage.FirebaseStorage
+import org.intellij.lang.annotations.JdkConstants.HorizontalAlignment
 import us.cosplayapp.Cosplay.Cosplay
 import us.cosplayapp.Cosplay.CosplayWithId
 import us.cosplayapp.navigation.Screen
@@ -130,27 +132,33 @@ fun CosplayScreen(
                 }
             } else if (cosplayViewModel.filterUiState is CosplayUploadUiState.Success) {
                 if ((cosplayViewModel.filterUiState as CosplayUploadUiState.Success).cosList.isEmpty()
-                ) { Column() {
+                ) { Column(horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center) {
+                    Text(
+                        text = "No results! Time for a new cosplan",
+                        modifier = Modifier.padding(10.dp)
+                    )
                     Button(onClick = {
-                        //TODO should extract this into a reset method
-                        cosplayViewModel.mediaTypeParam = "Any"
-                        cosplayViewModel.complexityParam = "Any"
-                        cosplayViewModel.progressParam = "Any"
-                        cosplayViewModel.filter()
+                        cosplayViewModel.resetFilterParams()
                     }) {
                         Text(text = "Clear")
                     }
-                    Text(
-                        text = "no results :(",
-                        modifier = Modifier.padding(10.dp)
-                    )
                 }
                 } else {
-                    Button(onClick = {
-                        showFilterDialogue = true
-                    },
-                        modifier = Modifier.padding(10.dp)) {
-                        Text(text = "Filter")
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Row(modifier = Modifier.fillMaxWidth(0.7f).padding(10.dp), horizontalArrangement = Arrangement.Start) {
+                            Text(text = cosplayViewModel.formatFilterParams())
+                        }
+                        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
+                            Icon(
+                                imageVector = Icons.Filled.FilterAlt,
+                                contentDescription = "filter",
+                                modifier = Modifier.padding(10.dp).clickable {
+                                    showFilterDialogue = true
+                                },
+                                tint = Color.White
+                            )
+                        }
                     }
                     LazyColumn() {
                         items((cosplayViewModel.filterUiState as CosplayUploadUiState.Success).cosList) {
@@ -440,15 +448,15 @@ fun FilterDialogue(
     onDialogDismiss: () -> Unit = {}
 ) {
     var mediaType by rememberSaveable {
-        mutableStateOf("Any")
+        mutableStateOf(cosplayViewModel.mediaTypeParam)
     }
 
     var progress by rememberSaveable {
-        mutableStateOf("Any")
+        mutableStateOf(cosplayViewModel.progressParam)
     }
 
     var complexity by rememberSaveable {
-        mutableStateOf("Any")
+        mutableStateOf(cosplayViewModel.complexityParam)
     }
 
     Dialog(
@@ -473,7 +481,6 @@ fun FilterDialogue(
                     .fillMaxWidth()
                     .padding(10.dp)
             )
-            //code from https://developer.android.com/develop/ui/compose/components/datepickers
             Text(text = "Complexity", modifier = Modifier.padding(horizontal = 10.dp))
             Dropdown(
                 listOf("Simple", "Medium", "Complicated", "Any"),
@@ -511,6 +518,17 @@ fun FilterDialogue(
                         onDialogDismiss()
                     }) {
                     Text(text = "Filter")
+                }
+                Button(modifier = Modifier.padding(10.dp),
+                    colors = ButtonDefaults.outlinedButtonColors(
+                        contentColor = Color.Black,
+                        containerColor = Color.White
+                    ),
+                    onClick = {
+                        cosplayViewModel.resetFilterParams()
+                        onDialogDismiss()
+                    }) {
+                    Text(text = "Reset")
                 }
 
             }

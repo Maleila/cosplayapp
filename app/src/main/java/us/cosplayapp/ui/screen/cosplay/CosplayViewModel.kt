@@ -155,6 +155,30 @@ class CosplayViewModel: ViewModel() {
 
         return CosplayWithId( "",Cosplay("", "", "","", "", "", ""),)
     }
+
+    fun resetFilterParams() {
+        mediaTypeParam = "Any"
+        complexityParam = "Any"
+        progressParam = "Any"
+        filter()
+    }
+
+    fun formatFilterParams(): String {
+        var result = "";
+        if(mediaTypeParam != "Any") {
+            result += "$mediaTypeParam, "
+        }
+        if(complexityParam != "Any") {
+            result += "$complexityParam, "
+        }
+        if(progressParam != "Any") {
+            result += "$progressParam, "
+        }
+        if(result.isNotEmpty()) {
+            return "Filter by: " + result.dropLast(2)
+        }
+        return "Filter by: all cosplays"
+    }
 }
 
 sealed interface CosplayUploadUiState {
