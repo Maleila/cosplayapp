@@ -133,7 +133,8 @@ fun CosplayScreen(
             } else if (cosplayViewModel.filterUiState is CosplayUploadUiState.Success) {
                 if ((cosplayViewModel.filterUiState as CosplayUploadUiState.Success).cosList.isEmpty()
                 ) { Column(horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Center) {
+                    verticalArrangement = Arrangement.Center,
+                    modifier = Modifier.fillMaxSize()) {
                     Text(
                         text = "No results! Time for a new cosplan",
                         modifier = Modifier.padding(10.dp)

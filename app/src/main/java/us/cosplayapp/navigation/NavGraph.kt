@@ -1,5 +1,7 @@
 package us.cosplayapp.navigation
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
@@ -13,6 +15,7 @@ import us.cosplayapp.ui.screen.cosplay.CosplayScreen
 import us.cosplayapp.ui.screen.cosplayDetails.CosplayDetails
 import us.cosplayapp.ui.screen.home.HomeScreen
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun NavGraph (
     navController: NavHostController = rememberNavController(),
@@ -69,7 +72,10 @@ fun NavGraph (
                 ConDetails(con,
                     onNavigateToConScreen = {
                         navController.navigate(Screen.Cons.route)
-                })
+                },
+                    onNavigateToCosplayDetails = {character ->
+                        navController.navigate("cosplayDetails/$character")
+                    })
             }
         }
     }

@@ -80,6 +80,15 @@ class ConDetailsViewModel: ViewModel() {
         return Con("", "", listOf(""),"")
     }
 
+    fun getIdByCosplay(name: String, cosplays: List<CosplayWithId>): String? {
+        for(c in cosplays) {
+            if(c.cosplay.character == name) {
+                return c.cosId
+            }
+        }
+        return null
+    }
+
     fun editCon(newCon: ConWithId) {
         Log.d("EDITCON", newCon.conId)
 

@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AddCircleOutline
 import androidx.compose.material.icons.filled.CalendarMonth
@@ -19,6 +20,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -47,7 +49,8 @@ import us.cosplayapp.ui.screen.cosplayDetails.CosplayDetailsViewModel
 fun ConDetails(
     id: String,
     conDetailsViewModel: ConDetailsViewModel = viewModel(),
-    onNavigateToConScreen: () -> Unit
+    onNavigateToConScreen: () -> Unit,
+    onNavigateToCosplayDetails: (String) -> Unit
 ) {
 
     val conListState = conDetailsViewModel.conList().collectAsState(
@@ -75,7 +78,17 @@ fun ConDetails(
         horizontalAlignment = Alignment.Start) {
 
         if (conListState.value == ConDetailsViewModel.ConUIState.Init) {
-            Text(text = "loading")
+            Column(modifier = Modifier.fillMaxSize(),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center) {
+                Text(
+                    text = "loading",
+                    modifier = Modifier.padding(10.dp)
+                )
+                LinearProgressIndicator(modifier = Modifier.width(75.dp),
+                    color = MaterialTheme.colorScheme.secondary,
+                    trackColor = MaterialTheme.colorScheme.surfaceVariant)
+            }
         } else {
             if(!isDeleted) {
                 ConDetails(
@@ -90,7 +103,9 @@ fun ConDetails(
                 onAddCosplan = {
                     showAddCosplanDialogue = true
                 },
-                    conDetailsViewModel
+                    conDetailsViewModel,
+                    onNavigateToCosplayDetails,
+                    cosListState.value
                 )
             } else {
                 Text(text="you deleted it :(")
@@ -135,7 +150,9 @@ fun ConDetails(
 fun ConDetails(con: ConWithId,
                onEditCon: (ConWithId) -> Unit = {},
                onAddCosplan: () -> Unit = {},
-               conDetailsViewModel: ConDetailsViewModel) {
+               conDetailsViewModel: ConDetailsViewModel,
+               onNavigateToCosplayDetails: (String) -> Unit,
+                cosListState: ConDetailsViewModel.CosplayUIState) {
     Column(modifier = Modifier.padding(10.dp)) {
         Row(modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.Center) {
@@ -185,7 +202,8 @@ fun ConDetails(con: ConWithId,
         FlowRow() {
             con.con.cosplans.forEach { cos ->
                 if(cos.trim() != "") {
-                    Button(onClick = { /*TODO*/ },
+                    Button(onClick = { conDetailsViewModel.getIdByCosplay(cos, (cosListState as ConDetailsViewModel.CosplayUIState.Success).cosList)
+                        ?.let { onNavigateToCosplayDetails(it) } },
                         modifier = Modifier.padding(5.dp)) {
                         Text(text = cos)
                     }
