@@ -73,12 +73,13 @@ fun NavGraph (
             val con = it.arguments?.getString("con")
             if (con != null) {
                 ConDetails(con,
-                    onNavigateToConScreen = {
-                        navController.navigate(Screen.Cons.route)
-                },
                     onNavigateToCosplayDetails = {character ->
                         navController.navigate("cosplayDetails/$character")
+                    },
+                    onDeleteCon = {
+                        navController.popBackStack()
                     })
+
             }
         }
     }

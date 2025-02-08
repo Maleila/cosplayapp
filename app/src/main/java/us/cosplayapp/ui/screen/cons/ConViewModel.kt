@@ -8,9 +8,9 @@ import us.cosplayapp.Con.Con
 //import com.google.firebase.auth.FirebaseAuth
 //import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.tasks.await
 import us.cosplayapp.Con.ConWithId
 
 class ConViewModel: ViewModel() {
@@ -71,6 +71,21 @@ class ConViewModel: ViewModel() {
             snapshotListener.remove()
         }
     }
+
+    suspend fun verifyCon(id: String): Con? {
+        val snapshot =
+            FirebaseFirestore.getInstance().collection(COLLECTION_CONS).document(id).get().await()
+        return snapshot.toObject(Con::class.java)
+    }
+
+//  fun verifyCon(id: String) = callbackFlow {
+//        val snapshot =
+//            FirebaseFirestore.getInstance().collection(COLLECTION_CONS).document(id).get().await()
+//        val response = snapshot.toObject(Con::class.java)
+//
+//        trySend(response) // emit this value through the flow
+//    }
+
 }
 
 sealed interface ConUploadUiState {

@@ -50,7 +50,7 @@ fun HomeScreen(
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(20.dp),
+                    .padding(40.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Text(text = "Cosplay",

@@ -36,21 +36,17 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.viewmodel.compose.viewModel
-import org.intellij.lang.annotations.JdkConstants.HorizontalAlignment
 import us.cosplayapp.Con.Con
 import us.cosplayapp.Con.ConWithId
-import us.cosplayapp.Cosplay.Cosplay
 import us.cosplayapp.Cosplay.CosplayWithId
 import us.cosplayapp.ui.screen.cosplay.Dropdown
-import us.cosplayapp.ui.screen.cosplayDetails.AddConDialogue
-import us.cosplayapp.ui.screen.cosplayDetails.CosplayDetailsViewModel
 
 @Composable
 fun ConDetails(
     id: String,
     conDetailsViewModel: ConDetailsViewModel = viewModel(),
-    onNavigateToConScreen: () -> Unit,
-    onNavigateToCosplayDetails: (String) -> Unit
+    onNavigateToCosplayDetails: (String) -> Unit,
+    onDeleteCon: () -> Unit
 ) {
 
     val conListState = conDetailsViewModel.conList().collectAsState(
@@ -97,7 +93,7 @@ fun ConDetails(
                             id,
                             (conListState.value as ConDetailsViewModel.ConUIState.Success).conList
                         )),
-                    onEditCon = { con ->
+                    onEditCon = {
                         showEditDialog = true
                     },
                 onAddCosplan = {
@@ -107,8 +103,6 @@ fun ConDetails(
                     onNavigateToCosplayDetails,
                     cosListState.value
                 )
-            } else {
-                Text(text="you deleted it :(")
             }
 
             if(showEditDialog) {
@@ -122,9 +116,12 @@ fun ConDetails(
                     onDialogDismiss = {
                         showEditDialog = false
                     },
-                    onNavigateToConScreen,
-                    onDelete = {
-                        isDeleted = true //TODO not the smoothest way to deal with this
+                    onDelete = { id ->
+                        isDeleted = true
+                        conDetailsViewModel.deleteCon(
+                            id
+                        )
+                        onDeleteCon()
                     }
                 )
             }
@@ -232,7 +229,7 @@ fun AddCosplanDialogue(
     onDialogDismiss: () -> Unit = {}
 ) {
     Dialog(onDismissRequest = {
-        onDialogDismiss
+        onDialogDismiss()
     }) {
         var cosList by rememberSaveable {
             mutableStateOf(conDetailsViewModel.getCosplaysList(cosplays))
@@ -275,8 +272,7 @@ fun EditDialogue(
     con: ConWithId,
     conDetailsViewModel: ConDetailsViewModel,
     onDialogDismiss: () -> Unit = {},
-    onNavigateToConScreen: () -> Unit,
-    onDelete: () -> Unit
+    onDelete: (String) -> Unit
 ) {
     //code from https://developer.android.com/develop/ui/compose/components/datepickers
 
@@ -357,12 +353,8 @@ fun EditDialogue(
                         containerColor = Color.Red
                     ),
                     onClick = {
-                        onDelete()
-                        conDetailsViewModel.deleteCon(
-                            con.conId
-                        )
                         onDialogDismiss()
-                        onNavigateToConScreen()
+                        onDelete(con.conId)
                     }) {
                     Text(text = "Delete")
                 }
