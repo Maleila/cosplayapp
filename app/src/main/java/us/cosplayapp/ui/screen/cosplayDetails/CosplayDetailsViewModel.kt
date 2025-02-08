@@ -291,6 +291,15 @@ class CosplayDetailsViewModel : ViewModel(
             .addOnFailureListener { e -> Log.w("DELETE", "Error deleting document", e) }
     }
 
+    fun getIdByCon(name: String, cons: List<ConWithId>): String? {
+        for(c in cons) {
+            if(c.con.name == name) {
+                return c.conId
+            }
+        }
+        return null
+    }
+
     sealed interface CosplayDetailsUIState {
         object Init : CosplayDetailsUIState
 

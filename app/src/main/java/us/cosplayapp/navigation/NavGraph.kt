@@ -60,7 +60,10 @@ fun NavGraph (
             )) {
             val character = it.arguments?.getString("character")
             if (character != null) {
-                CosplayDetails(character)
+                CosplayDetails(character,
+                    onNavigateToDetailsScreen = { con ->
+                        navController.navigate("conDetails/$con")
+                    },)
             }
         }
         composable("conDetails/{con}",

@@ -66,11 +66,13 @@ import us.cosplayapp.Cosplay.Cosplay
 import us.cosplayapp.Cosplay.CosplayWithId
 import us.cosplayapp.ui.screen.cosplay.Dropdown
 import androidx.compose.ui.input.pointer.pointerInput
+import us.cosplayapp.ui.screen.conDetails.ConDetailsViewModel
 
 @Composable
 
 fun CosplayDetails(
     id: String,
+    onNavigateToDetailsScreen: (String) -> Unit,
     cosplayDetailsViewModel: CosplayDetailsViewModel = viewModel())
 {
 
@@ -117,6 +119,8 @@ fun CosplayDetails(
                 onImageClicked = {  photo ->
                     activeUri = photo
                 },
+                onNavigateToConDetails = onNavigateToDetailsScreen,
+                conListState.value,
                 cosplayDetailsViewModel
             )
 
@@ -164,6 +168,8 @@ fun CosplayDetails(cosplay: CosplayWithId,
                    onEditCosplay: (Cosplay) -> Unit = {},
                    onAddCon: () -> Unit = {},
                    onImageClicked: (Uri) -> Unit,
+                   onNavigateToConDetails: (String) -> Unit,
+                   conListState: CosplayDetailsViewModel.ConUIState,
                    cosplayDetailsViewModel: CosplayDetailsViewModel)
 {
     var charTextColor: Color = when (cosplay.cosplay.progress) {
@@ -248,7 +254,8 @@ fun CosplayDetails(cosplay: CosplayWithId,
     FlowRow() {
         cosplay.cosplay.consList.forEach { con ->
             if(con.trim() != "") {
-                Button(onClick = { /*TODO*/ },
+                Button(onClick = { cosplayDetailsViewModel.getIdByCon(con, (conListState as CosplayDetailsViewModel.ConUIState.Success).conList)
+                    ?.let { onNavigateToConDetails(it) }  },
                     modifier = Modifier.padding(5.dp)) {
                     Text(text = con)
                 }
