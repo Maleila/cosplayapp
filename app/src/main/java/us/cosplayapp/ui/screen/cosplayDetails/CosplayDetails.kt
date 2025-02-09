@@ -102,12 +102,14 @@ fun CosplayDetails(
         if (cosplayListState.value == CosplayDetailsViewModel.CosplayDetailsUIState.Init) {
             Text(text = "loading")
         } else {
+
+            var mycos = CosplayWithId(id,
+                cosplayDetailsViewModel.getCosplayById(
+                    id,
+                    (cosplayListState.value as CosplayDetailsViewModel.CosplayDetailsUIState.Success).cosList
+                ))
             CosplayDetails(
-                cosplay = CosplayWithId(id,
-                    cosplayDetailsViewModel.getCosplayById(
-                        id,
-                        (cosplayListState.value as CosplayDetailsViewModel.CosplayDetailsUIState.Success).cosList
-                    )),
+                mycos,
                 onEditCosplay = { cosplay ->
                     showEditDialog = true
                 },
@@ -124,11 +126,7 @@ fun CosplayDetails(
 
             if(showEditDialog) {
                 EditDialogue(
-                    cosplay = cosplayDetailsViewModel.getCosplayById(
-                        id,
-                        (cosplayListState.value as CosplayDetailsViewModel.CosplayDetailsUIState.Success).cosList
-                    ), //TODO maybe still not the best way to get this reference
-                    id,
+                    mycos,
                     cosplayDetailsViewModel,
                     onDeleteCosplay = {id ->
                         cosplayDetailsViewModel.deleteCosplay(
@@ -553,9 +551,9 @@ fun AddConDialogue(
     cosplayDetailsViewModel: CosplayDetailsViewModel,
     onDialogDismiss: () -> Unit = {}
 ) {
-    Dialog(onDismissRequest = {
+    Dialog(onDismissRequest =
         onDialogDismiss
-    }) {
+    ) {
         var conList by rememberSaveable {
             mutableStateOf(cosplayDetailsViewModel.getConsList(cons))
         }
@@ -642,8 +640,7 @@ fun Scrim(onDismiss: () -> Unit, modifier: Modifier) {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EditDialogue(
-    cosplay: Cosplay,
-    id: String, //TODO should change this to just passing the cosplaywithid
+    cosplay: CosplayWithId,
     cosplayDetailsViewModel: CosplayDetailsViewModel,
     onDialogDismiss: () -> Unit = {},
     onDeleteCosplay: (String) -> Unit
@@ -654,28 +651,28 @@ fun EditDialogue(
     ) {
 
         var character by rememberSaveable {
-            mutableStateOf(cosplay.character)
+            mutableStateOf(cosplay.cosplay.character)
         }
 
         var media by rememberSaveable {
-            mutableStateOf(cosplay.media)
+            mutableStateOf(cosplay.cosplay.media)
         }
 
         //TODO can't remember why this isn't a pre-defined list...?
         var mediaType by rememberSaveable {
-            mutableStateOf(cosplay.mediaType)
+            mutableStateOf(cosplay.cosplay.mediaType)
         }
 
         var progress by rememberSaveable {
-            mutableStateOf(cosplay.progress)
+            mutableStateOf(cosplay.cosplay.progress)
         }
 
         var complexity by rememberSaveable {
-            mutableStateOf(cosplay.complexity)
+            mutableStateOf(cosplay.cosplay.complexity)
         }
 
         var notes by rememberSaveable {
-            mutableStateOf(cosplay.notes)
+            mutableStateOf(cosplay.cosplay.notes)
         }
 
         Column(
@@ -761,7 +758,7 @@ fun EditDialogue(
                                 progress = progress,
                                 complexity = complexity,
                                 notes = notes),
-                            id
+                            cosplay.cosId
                         )
                         onDialogDismiss()
                     }) {
@@ -774,7 +771,7 @@ fun EditDialogue(
                     ),
                     onClick = {
                         onDialogDismiss()
-                        onDeleteCosplay(id)
+                        onDeleteCosplay(cosplay.cosId)
                     }) {
                     Text(text = "Delete")
                 }

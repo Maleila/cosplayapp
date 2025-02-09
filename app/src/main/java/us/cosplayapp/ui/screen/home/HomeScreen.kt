@@ -107,7 +107,7 @@ fun HomeScreen(
                     )
                 } else {
                     LazyColumn() {
-                        var upcomingCons: List<ConWithId> = homeViewModel.getUpcomingCons((conListState.value as HomeViewModel.ConUIState.Success).conList)
+                        val upcomingCons: List<ConWithId> = homeViewModel.getUpcomingCons((conListState.value as HomeViewModel.ConUIState.Success).conList)
                         if(upcomingCons.isEmpty()) {
 //                            Text(text = "No cons in the next 90 days",
 //                                modifier = Modifier.padding(10.dp))

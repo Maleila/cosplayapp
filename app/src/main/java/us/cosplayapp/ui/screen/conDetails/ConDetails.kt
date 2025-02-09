@@ -87,56 +87,52 @@ fun ConDetails(
             }
         } else {
             if(!isDeleted) {
+                var mycon = ConWithId(
+                    id,
+                    conDetailsViewModel.getConById(
+                        id,
+                        (conListState.value as ConDetailsViewModel.ConUIState.Success).conList
+                    )
+                )
+
                 ConDetails(
-                    con = ConWithId(id,
-                        conDetailsViewModel.getConById(
-                            id,
-                            (conListState.value as ConDetailsViewModel.ConUIState.Success).conList
-                        )),
+                    con = mycon,
                     onEditCon = {
                         showEditDialog = true
                     },
-                onAddCosplan = {
-                    showAddCosplanDialogue = true
-                },
+                    onAddCosplan = {
+                        showAddCosplanDialogue = true
+                    },
                     conDetailsViewModel,
                     onNavigateToCosplayDetails,
                     cosListState.value
                 )
-            }
 
-            if(showEditDialog) {
-                EditDialogue(
-                    con = ConWithId(id,
-                        conDetailsViewModel.getConById(
-                            id,
-                            (conListState.value as ConDetailsViewModel.ConUIState.Success).conList
-                        )), //TODO maybe still not the best way to get this reference
-                    conDetailsViewModel,
-                    onDialogDismiss = {
-                        showEditDialog = false
-                    },
-                    onDelete = { id ->
-                        isDeleted = true
-                        conDetailsViewModel.deleteCon(
-                            id
-                        )
-                        onDeleteCon()
-                    }
-                )
-            }
-            if(showAddCosplanDialogue) {
-                AddCosplanDialogue(
-                    (cosListState.value as ConDetailsViewModel.CosplayUIState.Success).cosList,
-                    con = ConWithId(id,
-                        conDetailsViewModel.getConById(
-                            id,
-                            (conListState.value as ConDetailsViewModel.ConUIState.Success).conList
-                        )),
-                    conDetailsViewModel = conDetailsViewModel,
-                    {
-                        showAddCosplanDialogue = false
-                    })
+                if (showEditDialog) {
+                    EditDialogue(
+                        con = mycon,
+                        conDetailsViewModel,
+                        onDialogDismiss = {
+                            showEditDialog = false
+                        },
+                        onDelete = { id ->
+                            isDeleted = true
+                            conDetailsViewModel.deleteCon(
+                                id
+                            )
+                            onDeleteCon()
+                        }
+                    )
+                }
+                if (showAddCosplanDialogue) {
+                    AddCosplanDialogue(
+                        (cosListState.value as ConDetailsViewModel.CosplayUIState.Success).cosList,
+                        con = mycon,
+                        conDetailsViewModel = conDetailsViewModel,
+                        onDialogDismiss = {
+                            showAddCosplanDialogue = false
+                        })
+                }
             }
         }
     }
