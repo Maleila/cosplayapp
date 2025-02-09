@@ -1,7 +1,6 @@
 package us.cosplayapp.ui.screen.cosplayDetails
 
 import android.net.Uri
-import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
@@ -15,7 +14,6 @@ import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -66,13 +64,13 @@ import us.cosplayapp.Cosplay.Cosplay
 import us.cosplayapp.Cosplay.CosplayWithId
 import us.cosplayapp.ui.screen.cosplay.Dropdown
 import androidx.compose.ui.input.pointer.pointerInput
-import us.cosplayapp.ui.screen.conDetails.ConDetailsViewModel
 
 @Composable
 
 fun CosplayDetails(
     id: String,
     onNavigateToDetailsScreen: (String) -> Unit,
+    onDeleteCosplay: () -> Unit,
     cosplayDetailsViewModel: CosplayDetailsViewModel = viewModel())
 {
 
@@ -131,10 +129,15 @@ fun CosplayDetails(
                         (cosplayListState.value as CosplayDetailsViewModel.CosplayDetailsUIState.Success).cosList
                     ), //TODO maybe still not the best way to get this reference
                     id,
-                    cosplayDetailsViewModel
-                ) {
-                    showEditDialog = false
-                }
+                    cosplayDetailsViewModel,
+                    onDeleteCosplay = {id ->
+                        cosplayDetailsViewModel.deleteCosplay(
+                            id
+                        )
+                        onDeleteCosplay()
+                    },
+                    onDialogDismiss = { showEditDialog = false }
+                )
             }
 
             if(showAddConDialogue) {
@@ -640,11 +643,11 @@ fun Scrim(onDismiss: () -> Unit, modifier: Modifier) {
 @Composable
 fun EditDialogue(
     cosplay: Cosplay,
-    characterRef: String, //TODO should change this to just passing the cosplaywithid
+    id: String, //TODO should change this to just passing the cosplaywithid
     cosplayDetailsViewModel: CosplayDetailsViewModel,
-    onDialogDismiss: () -> Unit = {}
+    onDialogDismiss: () -> Unit = {},
+    onDeleteCosplay: (String) -> Unit
 ) {
-    //code from https://developer.android.com/develop/ui/compose/components/datepickers
 
     Dialog(
         onDismissRequest = onDialogDismiss
@@ -758,7 +761,7 @@ fun EditDialogue(
                                 progress = progress,
                                 complexity = complexity,
                                 notes = notes),
-                            characterRef
+                            id
                         )
                         onDialogDismiss()
                     }) {
@@ -770,10 +773,8 @@ fun EditDialogue(
                         containerColor = Color.Red
                     ),
                     onClick = {
-                        cosplayDetailsViewModel.deleteCosplay(
-                            characterRef
-                        )
                         onDialogDismiss()
+                        onDeleteCosplay(id)
                     }) {
                     Text(text = "Delete")
                 }

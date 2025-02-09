@@ -63,7 +63,10 @@ fun NavGraph (
                 CosplayDetails(character,
                     onNavigateToDetailsScreen = { con ->
                         navController.navigate("conDetails/$con")
-                    },)
+                    },
+                    onDeleteCosplay = {
+                        navController.popBackStack()
+                    })
             }
         }
         composable("conDetails/{con}",
