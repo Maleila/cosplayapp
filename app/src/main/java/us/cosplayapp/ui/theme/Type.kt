@@ -17,16 +17,28 @@ val provider = GoogleFont.Provider(
     certificates = R.array.com_google_android_gms_fonts_certs
 )
 
-val titleFont = GoogleFont("Bebas Neue")
+val titleFont = GoogleFont("Aboreto")
+
+val subtitle = GoogleFont("Reenie Beanie")
+
+val textFont = GoogleFont("Inter")
 
 val titleFamily = FontFamily(
     Font(googleFont = titleFont, fontProvider = provider)
 )
 
+val subtitleFamily = FontFamily(
+    Font(googleFont = subtitle, fontProvider = provider)
+)
+
+val textFamily = FontFamily(
+    Font(googleFont = textFont, fontProvider = provider)
+)
+
 // Set of Material typography styles to start with
 val Typography = Typography(
     bodyLarge = TextStyle(
-        fontFamily = FontFamily.Default,
+        fontFamily = textFamily,
         fontWeight = FontWeight.Normal,
         fontSize = 16.sp,
         lineHeight = 24.sp,
@@ -69,7 +81,7 @@ titleMedium = TextStyle(
     displayLarge = TextStyle(
         fontFamily = titleFamily,
         fontWeight = FontWeight.Normal,
-        fontSize = 50.sp,
+        fontSize = 48.sp,
         lineHeight = 20.sp,
         letterSpacing = 0.sp,
         lineHeightStyle = LineHeightStyle(
@@ -77,9 +89,9 @@ titleMedium = TextStyle(
             trim = LineHeightStyle.Trim.Both
         )),
     displayMedium = TextStyle(
-        fontFamily = titleFamily,
+        fontFamily = subtitleFamily,
         fontWeight = FontWeight.Normal,
-        fontSize = 48.sp,
+        fontSize = 35.sp,
         lineHeight = 1.em,
         letterSpacing = 0.sp,
         lineHeightStyle = LineHeightStyle(
@@ -88,9 +100,9 @@ titleMedium = TextStyle(
         )
     ),
     displaySmall = TextStyle(
-        fontFamily = titleFamily,
+        fontFamily = subtitleFamily,
         fontWeight = FontWeight.Normal,
-        fontSize = 150.sp,
+        fontSize = 30.sp,
         lineHeight = 1.em,
         letterSpacing = 0.sp,
         lineHeightStyle = LineHeightStyle(

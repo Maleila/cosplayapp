@@ -189,7 +189,7 @@ fun CosplayDetails(cosplay: CosplayWithId,
         horizontalArrangement = Arrangement.Center) {
         Text(
             text = cosplay.cosplay.character,
-            style = MaterialTheme.typography.displayMedium,
+            style = MaterialTheme.typography.displayLarge,
             modifier = Modifier.padding(10.dp),
             color = charTextColor
         )
@@ -199,7 +199,7 @@ fun CosplayDetails(cosplay: CosplayWithId,
             modifier = Modifier.clickable {
                 onEditCosplay(cosplay.cosplay)
             },
-            tint = Color.White
+            tint = MaterialTheme.colorScheme.secondary
         )
     }
     Spacer(modifier = Modifier.fillMaxHeight(0.02f))

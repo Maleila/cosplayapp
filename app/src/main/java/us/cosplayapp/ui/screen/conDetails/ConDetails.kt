@@ -150,7 +150,7 @@ fun ConDetails(con: ConWithId,
         Row(modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.Center) {
             Text(text = con.con.name,
-                style = MaterialTheme.typography.displayMedium,
+                style = MaterialTheme.typography.displayLarge,
                 modifier = Modifier.padding(10.dp))
             Icon(
                 imageVector = Icons.Filled.Settings,
@@ -158,7 +158,7 @@ fun ConDetails(con: ConWithId,
                 modifier = Modifier.clickable {
                     onEditCon(con)
                 },
-                tint = Color.White
+                tint = MaterialTheme.colorScheme.secondary
             )
         }
         Row(

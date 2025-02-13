@@ -177,7 +177,7 @@ class CosplayViewModel: ViewModel() {
         if(result.isNotEmpty()) {
             return "Filter by: " + result.dropLast(2)
         }
-        return "Filter by: all cosplays"
+        return "filter by: all cosplays"
     }
 }
 

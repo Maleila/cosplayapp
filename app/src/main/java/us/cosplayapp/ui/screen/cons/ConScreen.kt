@@ -7,6 +7,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -76,12 +77,12 @@ fun ConScreen(
         topBar = {
             Column(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(40.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
+                    .fillMaxWidth().fillMaxHeight(0.3f),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
             ) {
                 Text(text = "Cons",
-                    style = MaterialTheme.typography.displayMedium)
+                    style = MaterialTheme.typography.displayLarge)
             }
         },
         floatingActionButton = {
@@ -95,12 +96,13 @@ fun ConScreen(
                 Icon(
                     imageVector = Icons.Rounded.Add,
                     contentDescription = "Add",
-                    tint = Color.Black,
+                    tint = MaterialTheme.colorScheme.surfaceVariant,
                 )
             }
         }
     ) {
-        Column(modifier = Modifier.padding(it)) {
+        Column(modifier = Modifier.padding(it).fillMaxWidth(),
+            horizontalAlignment = Alignment.CenterHorizontally) {
             if (conListState.value == ConUploadUiState.Init) {
                 Column(modifier = Modifier.fillMaxSize(),
                     horizontalAlignment = Alignment.CenterHorizontally,
@@ -119,7 +121,7 @@ fun ConScreen(
                     Text(text = "no cons yet! add some :)",
                         modifier = Modifier.padding(10.dp))
                 } else {
-                    LazyColumn() {
+                    LazyColumn(modifier = Modifier.fillMaxWidth(0.92f)) {
                         items((conListState.value as ConUploadUiState.Success).conList) {
                             ConCard(con = it.con,
                                 onCardClicked = {
@@ -148,10 +150,7 @@ fun ConCard(
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surfaceVariant
         ),
-        shape = RoundedCornerShape(10.dp),
-        elevation = CardDefaults.cardElevation(
-            defaultElevation = 10.dp
-        ),
+        shape = RoundedCornerShape(24.dp),
         modifier = Modifier
             .padding(5.dp)
             .clickable { onCardClicked() }
@@ -171,7 +170,8 @@ fun ConCard(
                     modifier = Modifier
                         .weight(1f)
                 ) {
-                    Text(text = con.name)
+                    Text(text = con.name,
+                        style = MaterialTheme.typography.displaySmall)
                     Text(text = con.dates[0] + " - " + con.dates[1])
                     Text(text = con.location)
                 }

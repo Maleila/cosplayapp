@@ -5,6 +5,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -45,6 +46,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import androidx.lifecycle.viewmodel.compose.viewModel
 import us.cosplayapp.Cosplay.Cosplay
 
@@ -74,12 +76,12 @@ fun CosplayScreen(
         topBar = {
             Column(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(40.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
+                    .fillMaxWidth().fillMaxHeight(0.3f),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
             ) {
                 Text(text = "Cosplays",
-                    style = MaterialTheme.typography.displayMedium)
+                    style = MaterialTheme.typography.displayLarge)
             }
         },
         floatingActionButton = {
@@ -87,7 +89,7 @@ fun CosplayScreen(
                 onClick = {
                     showAddDialog = true
                 },
-                containerColor = Color.Gray,
+                containerColor = MaterialTheme.colorScheme.surfaceVariant,
                 shape = RoundedCornerShape(16.dp),
             ) {
                 Icon(
@@ -98,7 +100,8 @@ fun CosplayScreen(
             }
         }
     ) {
-        Column(modifier = Modifier.padding(it)) {
+        Column(modifier = Modifier.padding(it).fillMaxWidth(),
+            horizontalAlignment = Alignment.CenterHorizontally) {
             if (cosplayViewModel.filterUiState == CosplayUploadUiState.Init ||
                 cosplayViewModel.filterUiState == CosplayUploadUiState.LoadingCosplayUpload
             ) {
@@ -118,20 +121,21 @@ fun CosplayScreen(
                 ) { Column(horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.Center,
                     modifier = Modifier.fillMaxSize()) {
-                    Text(
-                        text = "No results! Time for a new cosplan",
-                        modifier = Modifier.padding(10.dp)
-                    )
-                    Button(onClick = {
-                        cosplayViewModel.resetFilterParams()
-                    }) {
-                        Text(text = "Clear")
+                        Text(
+                            text = "No results! Time for a new cosplan",
+                            modifier = Modifier.padding(10.dp)
+                        )
+                        Button(onClick = {
+                            cosplayViewModel.resetFilterParams()
+                        }) {
+                            Text(text = "Clear")
+                        }
                     }
-                }
                 } else {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
+                    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth(0.92f)) {
                         Row(modifier = Modifier.fillMaxWidth(0.7f).padding(10.dp), horizontalArrangement = Arrangement.Start) {
-                            Text(text = cosplayViewModel.formatFilterParams())
+                            Text(text = cosplayViewModel.formatFilterParams(),
+                                style = MaterialTheme.typography.displaySmall)
                         }
                         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
                             Icon(
@@ -140,11 +144,11 @@ fun CosplayScreen(
                                 modifier = Modifier.padding(10.dp).clickable {
                                     showFilterDialogue = true
                                 },
-                                tint = Color.White
+                                tint = Color.Black
                             )
                         }
                     }
-                    LazyColumn() {
+                    LazyColumn(modifier = Modifier.fillMaxWidth(0.92f)) {
                         items((cosplayViewModel.filterUiState as CosplayUploadUiState.Success).cosList) {
                             CosplayCard(cosplay = it.cosplay,
                                 onCardClicked = { onNavigateToDetailsScreen(it.cosId) }
@@ -188,17 +192,14 @@ fun CosplayCard(
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surfaceVariant
         ),
-        shape = RoundedCornerShape(10.dp),
-        elevation = CardDefaults.cardElevation(
-            defaultElevation = 10.dp
-        ),
+        shape = RoundedCornerShape(24.dp),
         modifier = Modifier
-            .padding(5.dp)
+            .padding(vertical = 10.dp)
             .clickable { onCardClicked() }
     ) {
         Column(
             modifier = Modifier
-                .padding(10.dp)
+                .padding(8.dp)
         ) {
             Row(
                 modifier = Modifier
@@ -212,7 +213,8 @@ fun CosplayCard(
                         .weight(1f)
                 ) {
                     Text(text = cosplay.character,
-                        color = charTextColor)
+                        color = charTextColor,
+                        style = MaterialTheme.typography.displaySmall)
                     Text(text = cosplay.media)
                     Text(text = cosplay.complexity)
                 }
@@ -228,7 +230,7 @@ fun AddDialogue(
     onDialogDismiss: () -> Unit = {}
 ) {
     Dialog(
-        onDismissRequest = onDialogDismiss
+        onDismissRequest = onDialogDismiss,
     ) {
 
         var character by rememberSaveable {
@@ -299,7 +301,8 @@ fun AddDialogue(
                 )
                 .padding(10.dp)
         ) {
-            Text(text = "Character", modifier = Modifier.padding(horizontal = 10.dp))
+            Text(text = "Character", modifier = Modifier.padding(horizontal = 10.dp),
+                style = MaterialTheme.typography.bodyLarge)
             OutlinedTextField(
                 modifier = Modifier.fillMaxWidth(),
                 value = character,
@@ -326,7 +329,8 @@ fun AddDialogue(
                     modifier = Modifier.padding(start = 16.dp)
                 )
             }
-            Text(text = "Media", modifier = Modifier.padding(horizontal = 10.dp))
+            Text(text = "Media", modifier = Modifier.padding(horizontal = 10.dp),
+                style = MaterialTheme.typography.bodyLarge)
             OutlinedTextField(
                 modifier = Modifier.fillMaxWidth(),
                 value = media,
@@ -353,7 +357,8 @@ fun AddDialogue(
                     modifier = Modifier.padding(start = 16.dp)
                 )
             }
-            Text(text = "Media type", modifier = Modifier.padding(horizontal = 10.dp))
+            Text(text = "Media type", modifier = Modifier.padding(horizontal = 10.dp),
+                style = MaterialTheme.typography.bodyLarge)
             Dropdown(
                 listOf("Anime", "Movie", "Show", "Podcast", "Book", "Other"),
                 preselected = "Other",
@@ -364,7 +369,8 @@ fun AddDialogue(
                     .fillMaxWidth()
                     .padding(10.dp))
             //code from https://developer.android.com/develop/ui/compose/components/datepickers
-            Text(text = "Complexity", modifier = Modifier.padding(horizontal = 10.dp))
+            Text(text = "Complexity", modifier = Modifier.padding(horizontal = 10.dp),
+                style = MaterialTheme.typography.bodyLarge)
             Dropdown(
                 listOf("Simple", "Medium", "Complicated"),
                 preselected = "Medium",
@@ -374,7 +380,8 @@ fun AddDialogue(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(10.dp))
-            Text(text = "Progress", modifier = Modifier.padding(horizontal = 10.dp))
+            Text(text = "Progress", modifier = Modifier.padding(horizontal = 10.dp),
+                style = MaterialTheme.typography.bodyLarge)
             Dropdown(
                 listOf("Not started", "In Progress", "Completed"),
                 preselected = "Not Started",
@@ -384,7 +391,8 @@ fun AddDialogue(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(10.dp))
-            Text(text = "Notes", modifier = Modifier.padding(horizontal = 10.dp))
+            Text(text = "Notes", modifier = Modifier.padding(horizontal = 10.dp),
+                style = MaterialTheme.typography.bodyLarge)
             OutlinedTextField(
                 modifier = Modifier.fillMaxWidth(),
                 value = notes,
@@ -398,7 +406,7 @@ fun AddDialogue(
                 Button(modifier = Modifier.padding(10.dp),
                     colors = ButtonDefaults.outlinedButtonColors(
                         contentColor = Color.Black,
-                        containerColor = Color.White
+                        containerColor = MaterialTheme.colorScheme.surfaceVariant
                     ),
                     onClick = {
                         validateCharacter(character)
