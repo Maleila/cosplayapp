@@ -202,13 +202,21 @@ fun ConDatesPicker(
                     )
                     onDismiss()
                 },
+                colors = ButtonDefaults.outlinedButtonColors(
+                    contentColor = MaterialTheme.colorScheme.secondary,
+                    containerColor = MaterialTheme.colorScheme.surfaceVariant
+                ),
                 enabled = (dateRangePickerState.selectedEndDateMillis != null)
             ) {
                 Text("OK")
             }
         },
         dismissButton = {
-            Button(onClick = onDismiss) {
+            Button(onClick = onDismiss,
+                colors = ButtonDefaults.outlinedButtonColors(
+                    contentColor = MaterialTheme.colorScheme.secondary,
+                    containerColor = MaterialTheme.colorScheme.surfaceVariant
+                ),) {
                 Text("Cancel")
             }
         }
@@ -379,8 +387,8 @@ fun AddDialogue(
             Row {
                 Button(modifier = Modifier.padding(10.dp),
                     colors = ButtonDefaults.outlinedButtonColors(
-                        contentColor = Color.Black,
-                        containerColor = Color.White
+                        contentColor = MaterialTheme.colorScheme.secondary,
+                        containerColor = MaterialTheme.colorScheme.surfaceVariant
                     ),
                     onClick = {
                         validateName(name)

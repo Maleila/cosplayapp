@@ -185,12 +185,13 @@ fun CosplayDetails(cosplay: CosplayWithId,
         }
     }
 
-    Row(modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.Center) {
+    Row(modifier = Modifier.fillMaxSize().padding(70.dp),
+        horizontalArrangement = Arrangement.Center,
+        verticalAlignment = Alignment.Top) {
         Text(
             text = cosplay.cosplay.character,
             style = MaterialTheme.typography.displayLarge,
-            modifier = Modifier.padding(10.dp),
+            //modifier = Modifier.padding(60.dp),
             color = charTextColor
         )
         Icon(
@@ -202,13 +203,12 @@ fun CosplayDetails(cosplay: CosplayWithId,
             tint = MaterialTheme.colorScheme.secondary
         )
     }
-    Spacer(modifier = Modifier.fillMaxHeight(0.02f))
     Row(modifier = Modifier.fillMaxWidth()) {
-        Row(modifier = Modifier.fillMaxWidth(0.7f),
+        Row(modifier = Modifier.fillMaxWidth(0.6f),
             horizontalArrangement = Arrangement.Start) {
             Text(
                 text = cosplay.cosplay.media + " (" + cosplay.cosplay.mediaType + ")",
-                style = MaterialTheme.typography.bodyLarge,
+                style = MaterialTheme.typography.displaySmall,
                 modifier = Modifier.padding(10.dp)
             )
         }
@@ -216,7 +216,7 @@ fun CosplayDetails(cosplay: CosplayWithId,
             horizontalArrangement = Arrangement.End) {
             Text(
                 text = cosplay.cosplay.progress,
-                style = MaterialTheme.typography.bodyMedium,
+                style = MaterialTheme.typography.displaySmall,
                 modifier = Modifier.padding(10.dp)
             )
         }
@@ -231,15 +231,15 @@ fun CosplayDetails(cosplay: CosplayWithId,
             tint = MaterialTheme.colorScheme.secondary)
         Text(
             text = cosplay.cosplay.complexity,
-            style = MaterialTheme.typography.bodyMedium,
+            style = MaterialTheme.typography.displaySmall,
             modifier = Modifier.padding(10.dp)
         )
     }
 
     Spacer(modifier = Modifier.fillMaxHeight(0.02f))
     Text(
-        text = "Notes",
-        style = MaterialTheme.typography.bodyLarge,
+        text = "notes",
+        style = MaterialTheme.typography.displayMedium,
         modifier = Modifier.padding(10.dp)
     )
     Text(
@@ -248,8 +248,8 @@ fun CosplayDetails(cosplay: CosplayWithId,
         modifier = Modifier.padding(10.dp)
     )
     Text(
-        text = "Con Appearances",
-        style = MaterialTheme.typography.bodyLarge,
+        text = "con appearances",
+        style = MaterialTheme.typography.displayMedium,
         modifier = Modifier.padding(10.dp)
     )
     FlowRow() {
@@ -257,7 +257,11 @@ fun CosplayDetails(cosplay: CosplayWithId,
             if(con.trim() != "") {
                 Button(onClick = { cosplayDetailsViewModel.getIdByCon(con, (conListState as CosplayDetailsViewModel.ConUIState.Success).conList)
                     ?.let { onNavigateToConDetails(it) }  },
-                    modifier = Modifier.padding(5.dp)) {
+                    modifier = Modifier.padding(5.dp),
+                    colors = ButtonDefaults.outlinedButtonColors(
+                        contentColor = MaterialTheme.colorScheme.secondary,
+                        containerColor = MaterialTheme.colorScheme.surfaceVariant
+                    )){
                     Text(text = con)
                 }
             }
@@ -276,8 +280,8 @@ fun CosplayDetails(cosplay: CosplayWithId,
     )
     Spacer(modifier = Modifier.fillMaxHeight(0.02f))
     Text(
-        text = "To Do",
-        style = MaterialTheme.typography.bodyLarge,
+        text = "to do",
+        style = MaterialTheme.typography.displayMedium,
         modifier = Modifier.padding(10.dp)
     )
     CheckList(cosplay,
@@ -299,8 +303,8 @@ fun CosplayDetails(cosplay: CosplayWithId,
     )
     Spacer(modifier = Modifier.fillMaxHeight(0.02f))
     Text(
-        text = "Con Checklist",
-        style = MaterialTheme.typography.bodyLarge,
+        text = "con checklist",
+        style = MaterialTheme.typography.displayMedium,
         modifier = Modifier.padding(10.dp)
     )
     CheckList(cosplay,
@@ -320,8 +324,8 @@ fun CosplayDetails(cosplay: CosplayWithId,
             cosplayDetailsViewModel.deleteChecklistItem(cosplay, index)
         }
     )
-    Text(text = "Gallery",
-        style = MaterialTheme.typography.bodyLarge,
+    Text(text = "gallery",
+        style = MaterialTheme.typography.displayMedium,
         modifier = Modifier.padding(10.dp))
     FlowRow() {//idk if flowrow is ideal for this - maybe lazygrid?
         cosplay.cosplay.referencePics.forEach { pic ->
@@ -337,7 +341,11 @@ fun CosplayDetails(cosplay: CosplayWithId,
     if(cosplayDetailsViewModel.imageUri != null) {
         Button(onClick = {
         cosplayDetailsViewModel.uploadImage(cosplay)
-        }) {
+        },
+        colors = ButtonDefaults.outlinedButtonColors(
+            contentColor = MaterialTheme.colorScheme.secondary,
+            containerColor = MaterialTheme.colorScheme.surfaceVariant
+        )) {
             Text(text = "add photo")
         }
     }
@@ -512,8 +520,11 @@ fun ImagePicker(onImageSelected: (Uri) -> Unit) {
     )
 
     Button(
-        onClick = { launcher.launch("image/*") }
-    ) {
+        onClick = { launcher.launch("image/*") },
+    colors = ButtonDefaults.outlinedButtonColors(
+        contentColor = MaterialTheme.colorScheme.secondary,
+        containerColor = MaterialTheme.colorScheme.surfaceVariant
+    )){
         Text("Select Image")
     }
 }
@@ -585,7 +596,11 @@ fun AddConDialogue(
             Button(onClick = {
                 cosplayDetailsViewModel.addCon(con, cosplay)
                 onDialogDismiss()
-            }) {
+            },
+                colors = ButtonDefaults.outlinedButtonColors(
+                    contentColor = MaterialTheme.colorScheme.secondary,
+                    containerColor = MaterialTheme.colorScheme.surfaceVariant
+                ),) {
                 Text(text = "Add")
             }
         }
@@ -750,7 +765,7 @@ fun EditDialogue(
                 Button(modifier = Modifier.padding(10.dp),
                     colors = ButtonDefaults.outlinedButtonColors(
                         contentColor = MaterialTheme.colorScheme.secondary,
-                        containerColor = Color.White
+                        containerColor = MaterialTheme.colorScheme.surfaceVariant
                     ),
                     onClick = {
                         cosplayDetailsViewModel.editCosplay(
