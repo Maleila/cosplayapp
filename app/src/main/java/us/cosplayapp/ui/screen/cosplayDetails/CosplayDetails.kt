@@ -228,7 +228,7 @@ fun CosplayDetails(cosplay: CosplayWithId,
         Icon(
             imageVector = Icons.Filled.Speed,
             contentDescription = "complexity",
-            tint = Color.White)
+            tint = MaterialTheme.colorScheme.secondary)
         Text(
             text = cosplay.cosplay.complexity,
             style = MaterialTheme.typography.bodyMedium,
@@ -272,7 +272,7 @@ fun CosplayDetails(cosplay: CosplayWithId,
             .clickable {
                 onAddCon()
             },
-        tint = Color.White
+        tint = MaterialTheme.colorScheme.secondary
     )
     Spacer(modifier = Modifier.fillMaxHeight(0.02f))
     Text(
@@ -320,6 +320,9 @@ fun CosplayDetails(cosplay: CosplayWithId,
             cosplayDetailsViewModel.deleteChecklistItem(cosplay, index)
         }
     )
+    Text(text = "Gallery",
+        style = MaterialTheme.typography.bodyLarge,
+        modifier = Modifier.padding(10.dp))
     FlowRow() {//idk if flowrow is ideal for this - maybe lazygrid?
         cosplay.cosplay.referencePics.forEach { pic ->
             if(pic.trim() != "") {
@@ -395,7 +398,7 @@ fun CheckList(cosplay: CosplayWithId,
                                         editedTodo = item.substring(1)
                                         //should also focus so you don't have to click twice
                                     },
-                                textStyle = TextStyle(Color.White),
+                                textStyle = TextStyle(MaterialTheme.colorScheme.secondary),
                                 decorationBox = { innerTextField ->
                                     innerTextField() // No decoration, just the text and cursor
                                 })
@@ -412,8 +415,8 @@ fun CheckList(cosplay: CosplayWithId,
                                         itemModifiable = true
                                         //should also focus so you don't have to click twice
                                     },
-                                cursorBrush = SolidColor(Color.White),
-                                textStyle = TextStyle(Color.White),
+                                cursorBrush = SolidColor(MaterialTheme.colorScheme.secondary),
+                                textStyle = TextStyle(MaterialTheme.colorScheme.secondary),
                                 decorationBox = { innerTextField ->
                                     innerTextField() // No decoration, just the text and cursor
                                 })
@@ -432,7 +435,7 @@ fun CheckList(cosplay: CosplayWithId,
                                         onEditItem(cosplay, editedTodo, item[0] == '1', index)
                                         itemModifiable = false
                                     },
-                                tint = Color.White
+                                tint = MaterialTheme.colorScheme.secondary
                             )
                         }
                         Icon(
@@ -443,7 +446,7 @@ fun CheckList(cosplay: CosplayWithId,
                                 .clickable {
                                     onDeleteItem(cosplay, index)
                                 },
-                            tint = Color.White
+                            tint = MaterialTheme.colorScheme.secondary
                         )
                     }
                 }
@@ -480,7 +483,7 @@ fun CheckList(cosplay: CosplayWithId,
                                     newTodo = ""
                                     newCheck = false
                                 },
-                            tint = Color.White
+                            tint = MaterialTheme.colorScheme.secondary
                         )
                     }
                 }
@@ -495,7 +498,7 @@ fun CheckList(cosplay: CosplayWithId,
                 .clickable {
                     showAddTodo = true
                 },
-            tint = Color.White
+            tint = MaterialTheme.colorScheme.secondary
         )
     }
 }
@@ -536,8 +539,8 @@ fun TransparentTextField(
         modifier = Modifier
             .padding(5.dp)
             .focusRequester(focusRequester),
-        cursorBrush = SolidColor(Color.White),
-        textStyle = TextStyle(Color.White),
+        cursorBrush = SolidColor(MaterialTheme.colorScheme.secondary),
+        textStyle = TextStyle(MaterialTheme.colorScheme.secondary),
         decorationBox = { innerTextField ->
             innerTextField() // No decoration, just the text and cursor
         }
@@ -746,7 +749,7 @@ fun EditDialogue(
             Row {
                 Button(modifier = Modifier.padding(10.dp),
                     colors = ButtonDefaults.outlinedButtonColors(
-                        contentColor = Color.Black,
+                        contentColor = MaterialTheme.colorScheme.secondary,
                         containerColor = Color.White
                     ),
                     onClick = {
@@ -766,7 +769,7 @@ fun EditDialogue(
                 }
                 Button(modifier = Modifier.padding(10.dp),
                     colors = ButtonDefaults.outlinedButtonColors(
-                        contentColor = Color.Black,
+                        contentColor = MaterialTheme.colorScheme.secondary,
                         containerColor = Color.Red
                     ),
                     onClick = {
