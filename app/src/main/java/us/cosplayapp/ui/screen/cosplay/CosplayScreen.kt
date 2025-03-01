@@ -5,6 +5,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -304,7 +305,7 @@ fun AddDialogue(
             Text(text = "Character", modifier = Modifier.padding(horizontal = 10.dp),
                 style = MaterialTheme.typography.bodyLarge)
             OutlinedTextField(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 10.dp),
                 value = character,
                 singleLine = true,
                 trailingIcon = {
@@ -329,10 +330,11 @@ fun AddDialogue(
                     modifier = Modifier.padding(start = 16.dp)
                 )
             }
+            Spacer(modifier = Modifier.fillMaxHeight(0.01f))
             Text(text = "Media", modifier = Modifier.padding(horizontal = 10.dp),
                 style = MaterialTheme.typography.bodyLarge)
             OutlinedTextField(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 10.dp),
                 value = media,
                 singleLine = true,
                 trailingIcon = {
@@ -357,6 +359,7 @@ fun AddDialogue(
                     modifier = Modifier.padding(start = 16.dp)
                 )
             }
+            Spacer(modifier = Modifier.fillMaxHeight(0.01f))
             Text(text = "Media type", modifier = Modifier.padding(horizontal = 10.dp),
                 style = MaterialTheme.typography.bodyLarge)
             Dropdown(
@@ -394,7 +397,7 @@ fun AddDialogue(
             Text(text = "Notes", modifier = Modifier.padding(horizontal = 10.dp),
                 style = MaterialTheme.typography.bodyLarge)
             OutlinedTextField(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 10.dp),
                 value = notes,
                 //singleLine = true,
                 onValueChange = {
@@ -494,8 +497,8 @@ fun FilterDialogue(
             Row {
                 Button(modifier = Modifier.padding(10.dp),
                     colors = ButtonDefaults.outlinedButtonColors(
-                        contentColor = Color.Black,
-                        containerColor = Color.White
+                        contentColor = MaterialTheme.colorScheme.secondary,
+                        containerColor = MaterialTheme.colorScheme.surfaceVariant
                     ),
                     onClick = {
                         cosplayViewModel.mediaTypeParam = mediaType
@@ -508,8 +511,8 @@ fun FilterDialogue(
                 }
                 Button(modifier = Modifier.padding(10.dp),
                     colors = ButtonDefaults.outlinedButtonColors(
-                        contentColor = Color.Black,
-                        containerColor = Color.White
+                        contentColor = MaterialTheme.colorScheme.secondary,
+                        containerColor = MaterialTheme.colorScheme.surfaceVariant
                     ),
                     onClick = {
                         cosplayViewModel.resetFilterParams()

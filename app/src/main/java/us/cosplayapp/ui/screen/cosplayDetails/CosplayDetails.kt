@@ -64,6 +64,8 @@ import us.cosplayapp.Cosplay.Cosplay
 import us.cosplayapp.Cosplay.CosplayWithId
 import us.cosplayapp.ui.screen.cosplay.Dropdown
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 
 @Composable
 
@@ -185,14 +187,15 @@ fun CosplayDetails(cosplay: CosplayWithId,
         }
     }
 
-    Row(modifier = Modifier.fillMaxSize().padding(70.dp),
+    Row(modifier = Modifier.fillMaxSize().padding(vertical = 70.dp),
         horizontalArrangement = Arrangement.Center,
         verticalAlignment = Alignment.Top) {
         Text(
             text = cosplay.cosplay.character,
             style = MaterialTheme.typography.displayLarge,
-            //modifier = Modifier.padding(60.dp),
-            color = charTextColor
+            color = charTextColor,
+            softWrap = true,
+            textAlign = TextAlign.Center
         )
         Icon(
             imageVector = Icons.Filled.Settings,
