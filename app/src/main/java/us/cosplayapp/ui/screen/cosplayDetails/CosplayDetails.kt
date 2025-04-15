@@ -3,9 +3,11 @@ package us.cosplayapp.ui.screen.cosplayDetails
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -14,6 +16,7 @@ import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -48,8 +51,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onKeyEvent
@@ -64,8 +70,10 @@ import us.cosplayapp.Cosplay.Cosplay
 import us.cosplayapp.Cosplay.CosplayWithId
 import us.cosplayapp.ui.screen.cosplay.Dropdown
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.IntSize
 
 @Composable
 
@@ -94,6 +102,11 @@ fun CosplayDetails(
     var activeUri by rememberSaveable {
         mutableStateOf<Uri?>(null)
     }
+
+    var uriToDelete by rememberSaveable {
+        mutableStateOf<Uri?>(null)
+    }
+
     Column(modifier = Modifier
         .fillMaxSize()
         .padding(10.dp)
@@ -110,6 +123,7 @@ fun CosplayDetails(
                     id,
                     (cosplayListState.value as CosplayDetailsViewModel.CosplayDetailsUIState.Success).cosList
                 ))
+            val haptics = LocalHapticFeedback.current
             CosplayDetails(
                 mycos,
                 onEditCosplay = { cosplay ->
@@ -120,6 +134,10 @@ fun CosplayDetails(
                 },
                 onImageClicked = {  photo ->
                     activeUri = photo
+                },
+                onLongClick = { photo ->
+                    haptics.performHapticFeedback(HapticFeedbackType.LongPress)
+                    uriToDelete = photo
                 },
                 onNavigateToConDetails = onNavigateToDetailsScreen,
                 conListState.value,
@@ -153,6 +171,16 @@ fun CosplayDetails(
                         showAddConDialogue = false
                     })
             }
+
+            if(uriToDelete != null) {
+                deleteImageDialog(
+                    cosplay = mycos,
+                    cosplayDetailsViewModel = cosplayDetailsViewModel,
+                    uri = uriToDelete!!,
+                    onDismiss = { uriToDelete = null },
+                    onDeletePhoto = {}
+                )
+            }
         }
     }
 
@@ -171,6 +199,7 @@ fun CosplayDetails(cosplay: CosplayWithId,
                    onEditCosplay: (Cosplay) -> Unit = {},
                    onAddCon: () -> Unit = {},
                    onImageClicked: (Uri) -> Unit,
+                   onLongClick: (Uri) -> Unit,
                    onNavigateToConDetails: (String) -> Unit,
                    conListState: CosplayDetailsViewModel.ConUIState,
                    cosplayDetailsViewModel: CosplayDetailsViewModel)
@@ -187,7 +216,9 @@ fun CosplayDetails(cosplay: CosplayWithId,
         }
     }
 
-    Row(modifier = Modifier.fillMaxSize().padding(vertical = 70.dp),
+    Row(modifier = Modifier
+        .fillMaxSize()
+        .padding(vertical = 70.dp),
         horizontalArrangement = Arrangement.Center,
         verticalAlignment = Alignment.Top) {
         Text(
@@ -258,8 +289,12 @@ fun CosplayDetails(cosplay: CosplayWithId,
     FlowRow() {
         cosplay.cosplay.consList.forEach { con ->
             if(con.trim() != "") {
-                Button(onClick = { cosplayDetailsViewModel.getIdByCon(con, (conListState as CosplayDetailsViewModel.ConUIState.Success).conList)
-                    ?.let { onNavigateToConDetails(it) }  },
+                Button(
+                    onClick = {
+                        cosplayDetailsViewModel.getIdByCon(con,
+                            (conListState as CosplayDetailsViewModel.ConUIState.Success).conList)
+                    ?.let { onNavigateToConDetails(it) }
+                              },
                     modifier = Modifier.padding(5.dp),
                     colors = ButtonDefaults.outlinedButtonColors(
                         contentColor = MaterialTheme.colorScheme.secondary,
@@ -333,7 +368,7 @@ fun CosplayDetails(cosplay: CosplayWithId,
     FlowRow() {//idk if flowrow is ideal for this - maybe lazygrid?
         cosplay.cosplay.referencePics.forEach { pic ->
             if(pic.trim() != "") {
-                StoredImage(pic, onImageClicked)
+                StoredImage(pic, onImageClicked, onLongClick)
             }
 
         }
@@ -610,8 +645,10 @@ fun AddConDialogue(
     }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun StoredImage(uri: String, onClick: (Uri) -> Unit) {
+fun StoredImage(uri: String, onClick: (Uri) -> Unit, onLongClick: (Uri) -> Unit) {
+
     Uri.parse(uri)?.let {
         Image(
             painter = rememberAsyncImagePainter(it),
@@ -619,11 +656,50 @@ fun StoredImage(uri: String, onClick: (Uri) -> Unit) {
             modifier = Modifier
                 .height(200.dp)
                 .padding(5.dp)
-                .clickable {
-                    onClick(it)
-                }
+                .combinedClickable(
+//                    {
+//                    onClick(it)
+//                }
+                    onClick = { onClick(it) },
+                    onLongClick = {
+                        onLongClick(it)
+                    },
+                    onLongClickLabel = "long click"
+                )
         )
     }
+}
+
+@Composable
+fun deleteImageDialog(cosplay: CosplayWithId,
+                      cosplayDetailsViewModel: CosplayDetailsViewModel,
+                      uri: Uri, onDismiss: () -> Unit,
+                      onDeletePhoto: (Uri) -> Unit) {
+    Dialog(
+        onDismissRequest = onDismiss
+    ) {
+
+        Column(
+            Modifier
+                .background(
+                    color = MaterialTheme.colorScheme.secondaryContainer,
+                    shape = MaterialTheme.shapes.medium
+                )
+                .padding(10.dp)
+        ) {
+                Button(modifier = Modifier.padding(10.dp),
+                    colors = ButtonDefaults.outlinedButtonColors(
+                        contentColor = MaterialTheme.colorScheme.secondary,
+                        containerColor = MaterialTheme.colorScheme.surfaceVariant
+                    ),
+                    onClick =  {
+                        cosplayDetailsViewModel.deletePhoto(cosplay, uri)
+                        onDismiss()
+                    }) {
+                    Text(text = "Delete")
+                }
+            }
+        }
 }
 
 @Composable
@@ -639,7 +715,43 @@ fun FullScreenImage(uri: Uri, onDismiss: () -> Unit) {
             contentDescription = "Full-screen image",
             modifier = Modifier.fillMaxSize()
         )
+        //ImageWithZoom(uri, Modifier.aspectRatio(1f))
     }
+}
+
+
+//from https://github.com/android/snippets/blob/94c2b8fbfe08118fb611c14e6f6dcf1267aa5930/compose/snippets/src/main/java/com/example/compose/snippets/touchinput/pointerinput/TapAndPress.kt#L119-L138
+private fun calculateOffset(tapOffset: Offset, size: IntSize): Offset {
+    val offsetX = (-(tapOffset.x - (size.width / 2f)) * 2f)
+        .coerceIn(-size.width / 2f, size.width / 2f)
+    return Offset(offsetX, 0f)
+}
+
+//from https://github.com/android/snippets/blob/94c2b8fbfe08118fb611c14e6f6dcf1267aa5930/compose/snippets/src/main/java/com/example/compose/snippets/touchinput/pointerinput/TapAndPress.kt#L119-L138
+@Composable //double tap to zoom, better but not ideal
+private fun ImageWithZoom(uri: Uri, modifier: Modifier = Modifier) {
+    var zoomed by remember { mutableStateOf(false) }
+    var zoomOffset by remember { mutableStateOf(Offset.Zero) }
+    Image(
+        painter = rememberAsyncImagePainter(uri),
+        contentDescription = "full-screen image",
+        modifier = modifier
+            .pointerInput(Unit) {
+                detectTapGestures(
+                    onDoubleTap = { tapOffset ->
+                        zoomOffset = if (zoomed) Offset.Zero else
+                            calculateOffset(tapOffset, size)
+                        zoomed = !zoomed
+                    }
+                )
+            }
+            .graphicsLayer {
+                scaleX = if (zoomed) 2f else 1f
+                scaleY = if (zoomed) 2f else 1f
+                translationX = zoomOffset.x
+                translationY = zoomOffset.y
+            }
+    )
 }
 
 @Composable

@@ -136,7 +136,7 @@ class CosplayDetailsViewModel : ViewModel(
             .addOnFailureListener { e -> Log.w("Error adding con", e) }
     }
 
-    fun addPic(pic: Uri, cosplay: CosplayWithId) {
+    private fun addPic(pic: Uri, cosplay: CosplayWithId) {
         var newPicsList: MutableList<String> = cosplay.cosplay.referencePics.toMutableList()
         newPicsList.add(pic.toString())
         if(newPicsList[0] == "") {
@@ -289,6 +289,30 @@ class CosplayDetailsViewModel : ViewModel(
             .delete()
             .addOnSuccessListener { Log.d("DELETE", "DocumentSnapshot successfully deleted!") }
             .addOnFailureListener { e -> Log.w("DELETE", "Error deleting document", e) }
+    }
+
+    fun deletePhoto(cos: CosplayWithId, photo: Uri) {
+        var newPicsList: MutableList<String> = cos.cosplay.referencePics.toMutableList()
+        newPicsList.remove(photo.toString())
+
+        FirebaseFirestore.getInstance().collection(COLLECTION_COSPLAYS).document(cos.cosId)
+            .update(mapOf(
+                "referencePics" to newPicsList))
+            .addOnSuccessListener { Log.d("tag", "URI successfully removed!")
+                deleteFromStorage(cos, photo)}
+            .addOnFailureListener { e -> Log.w("Error deleting image URI", e) }
+    }
+
+    private fun deleteFromStorage(cos: CosplayWithId, photo: Uri) {
+        photo?.let { uri ->
+            val storageRef = FirebaseStorage.getInstance().reference
+            val imageRef = storageRef.child("${uri.lastPathSegment}")
+            Log.d("IMAGE", imageRef.toString())
+            Log.d("IMAGE", uri!!.toString())
+            imageRef.delete()
+                .addOnSuccessListener { Log.d("IMAGE", "image deleted from storage!") }
+                .addOnFailureListener {exception -> Log.d("IMAGE", exception.toString())}
+        }
     }
 
     fun getIdByCon(name: String, cons: List<ConWithId>): String? {
