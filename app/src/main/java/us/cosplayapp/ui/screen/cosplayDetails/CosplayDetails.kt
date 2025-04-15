@@ -16,7 +16,6 @@ import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -38,6 +37,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -72,7 +72,6 @@ import us.cosplayapp.ui.screen.cosplay.Dropdown
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.IntSize
 
 @Composable
@@ -107,6 +106,11 @@ fun CosplayDetails(
         mutableStateOf<Uri?>(null)
     }
 
+    var conToDelete by rememberSaveable {
+        mutableStateOf<String?>(null)
+
+    }
+
     Column(modifier = Modifier
         .fillMaxSize()
         .padding(10.dp)
@@ -138,6 +142,10 @@ fun CosplayDetails(
                 onLongClick = { photo ->
                     haptics.performHapticFeedback(HapticFeedbackType.LongPress)
                     uriToDelete = photo
+                },
+                onLongButtonClick = { con ->
+                    haptics.performHapticFeedback(HapticFeedbackType.LongPress)
+                    conToDelete = con
                 },
                 onNavigateToConDetails = onNavigateToDetailsScreen,
                 conListState.value,
@@ -174,11 +182,15 @@ fun CosplayDetails(
 
             if(uriToDelete != null) {
                 deleteImageDialog(
-                    cosplay = mycos,
-                    cosplayDetailsViewModel = cosplayDetailsViewModel,
-                    uri = uriToDelete!!,
                     onDismiss = { uriToDelete = null },
-                    onDeletePhoto = {}
+                    onDeletePhoto = { cosplayDetailsViewModel.deletePhoto(mycos, uriToDelete!!) }
+                )
+            }
+
+            if(conToDelete != null) {
+                deleteConDialog(
+                    onDismiss = { conToDelete = null},
+                    onDelete = { cosplayDetailsViewModel.deleteConAppearance(mycos, conToDelete!!)}
                 )
             }
         }
@@ -193,13 +205,16 @@ fun CosplayDetails(
     }
 }
 
-@OptIn(ExperimentalLayoutApi::class, ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalLayoutApi::class, ExperimentalMaterial3Api::class,
+    ExperimentalFoundationApi::class
+)
 @Composable
 fun CosplayDetails(cosplay: CosplayWithId,
                    onEditCosplay: (Cosplay) -> Unit = {},
                    onAddCon: () -> Unit = {},
                    onImageClicked: (Uri) -> Unit,
                    onLongClick: (Uri) -> Unit,
+                   onLongButtonClick: (String) -> Unit,
                    onNavigateToConDetails: (String) -> Unit,
                    conListState: CosplayDetailsViewModel.ConUIState,
                    cosplayDetailsViewModel: CosplayDetailsViewModel)
@@ -289,17 +304,41 @@ fun CosplayDetails(cosplay: CosplayWithId,
     FlowRow() {
         cosplay.cosplay.consList.forEach { con ->
             if(con.trim() != "") {
-                Button(
-                    onClick = {
-                        cosplayDetailsViewModel.getIdByCon(con,
-                            (conListState as CosplayDetailsViewModel.ConUIState.Success).conList)
-                    ?.let { onNavigateToConDetails(it) }
-                              },
-                    modifier = Modifier.padding(5.dp),
-                    colors = ButtonDefaults.outlinedButtonColors(
-                        contentColor = MaterialTheme.colorScheme.secondary,
-                        containerColor = MaterialTheme.colorScheme.surfaceVariant
-                    )){
+//                Button(
+//                    onClick = {
+//                        cosplayDetailsViewModel.getIdByCon(con,
+//                            (conListState as CosplayDetailsViewModel.ConUIState.Success).conList)
+//                    ?.let { onNavigateToConDetails(it) }
+//                              },
+//                    modifier = Modifier.padding(5.dp)
+//                        .combinedClickable(
+//                            onClick = {
+//                                cosplayDetailsViewModel.getIdByCon(con,
+//                                    (conListState as CosplayDetailsViewModel.ConUIState.Success).conList)
+//                                    ?.let { onNavigateToConDetails(it) }
+//                            },
+//                        onLongClick = {
+//                            onLongButtonClick
+//                        }
+//                    ),
+//                    colors = ButtonDefaults.outlinedButtonColors(
+//                        contentColor = MaterialTheme.colorScheme.secondary,
+//                        containerColor = MaterialTheme.colorScheme.surfaceVariant
+//                    )){
+//                    Text(text = con)
+//                }
+                Surface(modifier = Modifier.padding(5.dp)
+                    .combinedClickable(
+                        onClick = {
+                            cosplayDetailsViewModel.getIdByCon(con,
+                                (conListState as CosplayDetailsViewModel.ConUIState.Success).conList)
+                                ?.let { onNavigateToConDetails(it) }
+                        },
+                        onLongClick = {
+                            onLongButtonClick(con)
+                        }
+                    ),
+                    color = MaterialTheme.colorScheme.surfaceVariant) {
                     Text(text = con)
                 }
             }
@@ -657,9 +696,6 @@ fun StoredImage(uri: String, onClick: (Uri) -> Unit, onLongClick: (Uri) -> Unit)
                 .height(200.dp)
                 .padding(5.dp)
                 .combinedClickable(
-//                    {
-//                    onClick(it)
-//                }
                     onClick = { onClick(it) },
                     onLongClick = {
                         onLongClick(it)
@@ -671,10 +707,8 @@ fun StoredImage(uri: String, onClick: (Uri) -> Unit, onLongClick: (Uri) -> Unit)
 }
 
 @Composable
-fun deleteImageDialog(cosplay: CosplayWithId,
-                      cosplayDetailsViewModel: CosplayDetailsViewModel,
-                      uri: Uri, onDismiss: () -> Unit,
-                      onDeletePhoto: (Uri) -> Unit) {
+fun deleteImageDialog(onDismiss: () -> Unit,
+                      onDeletePhoto: () -> Unit) {
     Dialog(
         onDismissRequest = onDismiss
     ) {
@@ -693,13 +727,42 @@ fun deleteImageDialog(cosplay: CosplayWithId,
                         containerColor = MaterialTheme.colorScheme.surfaceVariant
                     ),
                     onClick =  {
-                        cosplayDetailsViewModel.deletePhoto(cosplay, uri)
+                        onDeletePhoto()
                         onDismiss()
                     }) {
                     Text(text = "Delete")
                 }
             }
         }
+}
+
+@Composable
+fun deleteConDialog(onDismiss: () -> Unit, onDelete: () -> Unit) {
+    Dialog(
+        onDismissRequest = onDismiss
+    ) {
+
+        Column(
+            Modifier
+                .background(
+                    color = MaterialTheme.colorScheme.secondaryContainer,
+                    shape = MaterialTheme.shapes.medium
+                )
+                .padding(10.dp)
+        ) {
+            Button(modifier = Modifier.padding(10.dp),
+                colors = ButtonDefaults.outlinedButtonColors(
+                    contentColor = MaterialTheme.colorScheme.secondary,
+                    containerColor = MaterialTheme.colorScheme.surfaceVariant
+                ),
+                onClick =  {
+                    onDelete()
+                    onDismiss()
+                }) {
+                Text(text = "Delete")
+            }
+        }
+    }
 }
 
 @Composable

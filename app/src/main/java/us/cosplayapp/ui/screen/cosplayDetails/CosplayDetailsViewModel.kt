@@ -2,12 +2,9 @@ package us.cosplayapp.ui.screen.cosplayDetails
 
 import android.net.Uri
 import android.util.Log
-import android.widget.Toast
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.ViewModel
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
@@ -255,6 +252,18 @@ class CosplayDetailsViewModel : ViewModel(
         FirebaseFirestore.getInstance().collection(COLLECTION_COSPLAYS).document(cosplay.cosId)
             .update(mapOf(
                 "checklist" to newItems))
+            .addOnSuccessListener { Log.d("DELETE", "todo item successfully removed!") }
+            .addOnFailureListener { e -> Log.w("Error removing todo item", e) }
+    }
+
+    fun deleteConAppearance(cosplay: CosplayWithId, con: String) {
+        var newItems = cosplay.cosplay.consList.toMutableList()
+
+        newItems.remove(con)
+
+        FirebaseFirestore.getInstance().collection(COLLECTION_COSPLAYS).document(cosplay.cosId)
+            .update(mapOf(
+                "consList" to newItems))
             .addOnSuccessListener { Log.d("DELETE", "todo item successfully removed!") }
             .addOnFailureListener { e -> Log.w("Error removing todo item", e) }
     }
