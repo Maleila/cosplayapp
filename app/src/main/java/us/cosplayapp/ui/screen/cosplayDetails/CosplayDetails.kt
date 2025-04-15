@@ -9,6 +9,8 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.gestures.rememberTransformableState
+import androidx.compose.foundation.gestures.transformable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -773,46 +775,52 @@ fun FullScreenImage(uri: Uri, onDismiss: () -> Unit) {
         contentAlignment = Alignment.Center
     ) {
         Scrim(onDismiss, Modifier.fillMaxSize())
-        Image(
-            painter = rememberAsyncImagePainter(uri),
-            contentDescription = "Full-screen image",
-            modifier = Modifier.fillMaxSize()
-        )
-        //ImageWithZoom(uri, Modifier.aspectRatio(1f))
+//        Image(
+//            painter = rememberAsyncImagePainter(uri),
+//            contentDescription = "Full-screen image",
+//            modifier = Modifier.fillMaxSize()
+//        )
+        ImageWithZoom(uri, Modifier.fillMaxSize(), onDismiss)
     }
 }
 
 
-//from https://github.com/android/snippets/blob/94c2b8fbfe08118fb611c14e6f6dcf1267aa5930/compose/snippets/src/main/java/com/example/compose/snippets/touchinput/pointerinput/TapAndPress.kt#L119-L138
-private fun calculateOffset(tapOffset: Offset, size: IntSize): Offset {
-    val offsetX = (-(tapOffset.x - (size.width / 2f)) * 2f)
-        .coerceIn(-size.width / 2f, size.width / 2f)
-    return Offset(offsetX, 0f)
-}
-
-//from https://github.com/android/snippets/blob/94c2b8fbfe08118fb611c14e6f6dcf1267aa5930/compose/snippets/src/main/java/com/example/compose/snippets/touchinput/pointerinput/TapAndPress.kt#L119-L138
+//based on https://developer.android.com/develop/ui/compose/touch-input/pointer-input/multi-touch
 @Composable //double tap to zoom, better but not ideal
-private fun ImageWithZoom(uri: Uri, modifier: Modifier = Modifier) {
-    var zoomed by remember { mutableStateOf(false) }
-    var zoomOffset by remember { mutableStateOf(Offset.Zero) }
+private fun ImageWithZoom(uri: Uri, modifier: Modifier = Modifier, onDismiss: () -> Unit) {
+    // set up all transformation states
+    var scale by remember { mutableStateOf(1f) }
+    var rotation by remember { mutableStateOf(0f) }
+    var offset by remember { mutableStateOf(Offset.Zero) }
+    val state = rememberTransformableState { zoomChange, offsetChange, rotationChange ->
+        scale *= zoomChange
+        rotation += rotationChange
+        offset += offsetChange
+    }
     Image(
         painter = rememberAsyncImagePainter(uri),
         contentDescription = "full-screen image",
-        modifier = modifier
-            .pointerInput(Unit) {
-                detectTapGestures(
-                    onDoubleTap = { tapOffset ->
-                        zoomOffset = if (zoomed) Offset.Zero else
-                            calculateOffset(tapOffset, size)
-                        zoomed = !zoomed
-                    }
-                )
-            }
-            .graphicsLayer {
-                scaleX = if (zoomed) 2f else 1f
-                scaleY = if (zoomed) 2f else 1f
-                translationX = zoomOffset.x
-                translationY = zoomOffset.y
+        modifier
+            // apply other transformations like rotation and zoom
+            // on the pizza slice emoji
+            .graphicsLayer(
+                scaleX = scale,
+                scaleY = scale,
+                //rotationZ = rotation,
+                translationX = offset.x,
+                translationY = offset.y
+            )
+            // add transformable to listen to multitouch transformation events
+            // after offset
+            .transformable(state = state)
+            .pointerInput(onDismiss) { detectTapGestures { onDismiss() } }
+            .onKeyEvent {
+                if (it.key == Key.Escape) {
+                    onDismiss()
+                    true
+                } else {
+                    false
+                }
             }
     )
 }
@@ -820,15 +828,6 @@ private fun ImageWithZoom(uri: Uri, modifier: Modifier = Modifier) {
 @Composable
 fun Scrim(onDismiss: () -> Unit, modifier: Modifier) {
     Box(modifier = modifier
-        .pointerInput(onDismiss) { detectTapGestures { onDismiss() } }
-        .onKeyEvent {
-            if (it.key == Key.Escape) {
-                onDismiss()
-                true
-            } else {
-                false
-            }
-        }
         .background(Color.DarkGray.copy(alpha = 0.75f))) {
     }
 }
