@@ -33,6 +33,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -151,7 +152,9 @@ fun ConDetails(con: ConWithId,
             horizontalArrangement = Arrangement.Center) {
             Text(text = con.con.name,
                 style = MaterialTheme.typography.displayLarge,
-                modifier = Modifier.padding(10.dp))
+                modifier = Modifier.padding(10.dp),
+                softWrap = true,
+                textAlign = TextAlign.Center)
             Icon(
                 imageVector = Icons.Filled.Settings,
                 contentDescription = "edit",
@@ -169,7 +172,7 @@ fun ConDetails(con: ConWithId,
                 modifier = Modifier.clickable {
                     onEditCon(con)
                 },
-                tint = Color.White)
+                tint = MaterialTheme.colorScheme.secondary)
             Text(
                 text = con.con.location,
                 modifier = Modifier.padding(10.dp))
@@ -182,22 +185,26 @@ fun ConDetails(con: ConWithId,
                 modifier = Modifier.clickable {
                     onEditCon(con)
                 },
-                tint = Color.White)
+                tint = MaterialTheme.colorScheme.secondary)
             Text(
                 text = con.con.dates[0] + " - " + con.con.dates[1],
                 modifier = Modifier.padding(10.dp))
         }
         Text(
             text = "Cosplans",
-            style = MaterialTheme.typography.bodyLarge,
-            //modifier = Modifier.padding(10.dp)
+            style = MaterialTheme.typography.displaySmall,
+            modifier = Modifier.padding(10.dp)
         )
         FlowRow() {
             con.con.cosplans.forEach { cos ->
                 if(cos.trim() != "") {
                     Button(onClick = { conDetailsViewModel.getIdByCosplay(cos, (cosListState as ConDetailsViewModel.CosplayUIState.Success).cosList)
                         ?.let { onNavigateToCosplayDetails(it) } },
-                        modifier = Modifier.padding(5.dp)) {
+                        modifier = Modifier.padding(5.dp),
+                        colors = ButtonDefaults.outlinedButtonColors(
+                        contentColor = MaterialTheme.colorScheme.secondary,
+                        containerColor = MaterialTheme.colorScheme.surfaceVariant
+                    )) {
                         Text(text = cos)
                     }
                 }
@@ -212,7 +219,7 @@ fun ConDetails(con: ConWithId,
                 .clickable {
                     onAddCosplan()
                 },
-            tint = Color.White
+            tint = MaterialTheme.colorScheme.secondary
         )
     }
 }
@@ -255,7 +262,11 @@ fun AddCosplanDialogue(
             Button(onClick = {
                 conDetailsViewModel.addCosplan(con, cos)
                 onDialogDismiss()
-            }) {
+            },
+                colors = ButtonDefaults.outlinedButtonColors(
+                        contentColor = MaterialTheme.colorScheme.secondary,
+                        containerColor = MaterialTheme.colorScheme.surfaceVariant
+                    )) {
                 Text(text = "Add")
             }
         }
@@ -329,8 +340,8 @@ fun EditDialogue(
             Row {
                 Button(modifier = Modifier.padding(10.dp),
                     colors = ButtonDefaults.outlinedButtonColors(
-                        contentColor = Color.Black,
-                        containerColor = Color.White
+                        contentColor = MaterialTheme.colorScheme.secondary,
+                        containerColor = MaterialTheme.colorScheme.surfaceVariant
                     ),
                     onClick = {
                         conDetailsViewModel.editCon(
@@ -345,8 +356,8 @@ fun EditDialogue(
                 }
                 Button(modifier = Modifier.padding(10.dp),
                     colors = ButtonDefaults.outlinedButtonColors(
-                        contentColor = Color.Black,
-                        containerColor = Color.Red
+                        contentColor = MaterialTheme.colorScheme.secondary,
+                        containerColor = MaterialTheme.colorScheme.surfaceVariant
                     ),
                     onClick = {
                         onDialogDismiss()
