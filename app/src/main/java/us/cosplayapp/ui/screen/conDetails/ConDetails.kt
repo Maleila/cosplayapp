@@ -1,5 +1,6 @@
 package us.cosplayapp.ui.screen.conDetails
 
+import android.util.Log
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -9,17 +10,23 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AddCircleOutline
 import androidx.compose.material.icons.filled.CalendarMonth
+import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
@@ -36,17 +43,22 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.google.firebase.firestore.FirebaseFirestore
 import us.cosplayapp.Con.Con
 import us.cosplayapp.Con.ConWithId
 import us.cosplayapp.Cosplay.CosplayWithId
 import us.cosplayapp.ui.screen.cosplay.Dropdown
+import us.cosplayapp.ui.screen.cosplayDetails.CheckList
 import us.cosplayapp.ui.screen.cosplayDetails.CosplayDetailsViewModel
+import us.cosplayapp.ui.screen.cosplayDetails.TransparentTextField
 import us.cosplayapp.ui.screen.cosplayDetails.deleteConDialog
 
 @Composable
@@ -255,6 +267,29 @@ fun ConDetails(con: ConWithId,
                 },
             tint = MaterialTheme.colorScheme.secondary
         )
+        Spacer(modifier = Modifier.fillMaxHeight(0.02f))
+        Text(
+            text = "to do",
+            style = MaterialTheme.typography.displayMedium,
+            //modifier = Modifier.padding(10.dp)
+        )
+        CheckList(con,
+            con.con.toDo,
+            onEditItem = {cosplay, editedTodo, checked, index ->
+                conDetailsViewModel.changeToDoStatus(
+                    con,
+                    editedTodo,
+                    checked,
+                    index
+                )
+            },
+            onAddItem = { newTodo, newCheck, cosplay ->
+                conDetailsViewModel.addToDoItem(newTodo, newCheck, cosplay)
+            },
+            onDeleteItem = { cosplay, index ->
+                conDetailsViewModel.deleteToDo(cosplay, index)
+            }
+        )
     }
 }
 
@@ -431,5 +466,165 @@ fun EditDialogue(
 
             }
         }
+    }
+}
+
+@Composable
+fun CheckList(con: ConWithId,
+              items: List<String>,
+              onEditItem: (ConWithId, String, Boolean, Int) -> Unit,
+              onAddItem: (String, Boolean, ConWithId) -> Unit,
+              onDeleteItem: (ConWithId, Int) -> Unit) {
+
+    var showAddTodo by rememberSaveable {
+        mutableStateOf(false)
+    }
+    var newTodo by rememberSaveable {
+        mutableStateOf("")
+    }
+
+    var newCheck by rememberSaveable {
+        mutableStateOf(false)
+    }
+
+    Column {
+        items.forEachIndexed { index, item ->
+            Row(verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.fillMaxWidth()) {
+                if(item != "") {
+                    var editedTodo by rememberSaveable {
+                        mutableStateOf(item.substring(1))
+                    }
+                    var itemModifiable by rememberSaveable {
+                        mutableStateOf(false)
+                    }
+                    Row(modifier = Modifier.fillMaxWidth(0.8f),
+                        horizontalArrangement = Arrangement.Start,
+                        verticalAlignment = Alignment.CenterVertically) {
+                        Checkbox(
+                            checked = item[0] == '1',
+                            onCheckedChange = {
+                                onEditItem(con, item.substring(1), it, index)
+                            }
+                        )
+                        //can't use the same textfield bc one needs to be the actual to-do
+                        //so it updates w the database
+                        //and one needs to be a local var that the user can modify
+                        if(!itemModifiable) {
+                            BasicTextField(
+                                value = item.substring(1),
+                                onValueChange = {
+                                    editedTodo = it
+                                },
+                                enabled = false,
+                                modifier = Modifier
+                                    .padding(5.dp)
+                                    .clickable {
+                                        itemModifiable = true
+                                        editedTodo = item.substring(1)
+                                        //should also focus so you don't have to click twice
+                                    },
+                                textStyle = TextStyle(MaterialTheme.colorScheme.secondary),
+                                decorationBox = { innerTextField ->
+                                    innerTextField() // No decoration, just the text and cursor
+                                })
+                        }
+                        if(itemModifiable) {
+                            BasicTextField(
+                                value = editedTodo,
+                                onValueChange = {
+                                    editedTodo = it
+                                },
+                                modifier = Modifier
+                                    .padding(5.dp)
+                                    .clickable {
+                                        itemModifiable = true
+                                        //should also focus so you don't have to click twice
+                                    },
+                                cursorBrush = SolidColor(MaterialTheme.colorScheme.secondary),
+                                textStyle = TextStyle(MaterialTheme.colorScheme.secondary),
+                                decorationBox = { innerTextField ->
+                                    innerTextField() // No decoration, just the text and cursor
+                                })
+                        }
+                    }
+                    Row(modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.End,
+                        verticalAlignment = Alignment.CenterVertically) {
+                        if (itemModifiable) {
+                            Icon(
+                                imageVector = Icons.Filled.CheckCircle,
+                                contentDescription = "edit list item",
+                                modifier = Modifier
+                                    .padding(5.dp)
+                                    .clickable {
+                                        onEditItem(con, editedTodo, item[0] == '1', index)
+                                        itemModifiable = false
+                                    },
+                                tint = MaterialTheme.colorScheme.secondary
+                            )
+                        }
+                        Icon(
+                            imageVector = Icons.Filled.Delete,
+                            contentDescription = "delete list item",
+                            modifier = Modifier
+                                .padding(10.dp)
+                                .clickable {
+                                    onDeleteItem(con, index)
+                                },
+                            tint = MaterialTheme.colorScheme.secondary
+                        )
+                    }
+                }
+            }
+        }
+        if(showAddTodo) {
+            Row(modifier = Modifier.fillMaxWidth()) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.Start
+                ) {
+                    Checkbox(
+                        checked = newCheck,
+                        onCheckedChange = {
+                            newCheck = it
+                        }
+                    )
+                    TransparentTextField(value = newTodo,
+                        onValueChange = {
+                            newTodo = it
+                        })
+                    Row(modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.End,
+                        verticalAlignment = Alignment.CenterVertically) {
+                        Icon(
+                            imageVector = Icons.Filled.CheckCircle,
+                            contentDescription = "set new to-do item",
+                            modifier = Modifier
+                                .padding(12.dp)
+                                .clickable {
+                                    onAddItem(newTodo, newCheck, con)
+                                    showAddTodo = false
+                                    newTodo = ""
+                                    newCheck = false
+                                },
+                            tint = MaterialTheme.colorScheme.secondary
+                        )
+                    }
+                }
+            }
+
+        }
+        Icon(
+            imageVector = Icons.Filled.AddCircleOutline,
+            contentDescription = "add to-do item",
+            modifier = Modifier
+                .padding(12.dp)
+                .clickable {
+                    showAddTodo = true
+                },
+            tint = MaterialTheme.colorScheme.secondary
+        )
     }
 }

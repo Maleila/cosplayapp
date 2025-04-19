@@ -146,6 +146,66 @@ class ConDetailsViewModel: ViewModel() {
             .addOnFailureListener { e -> Log.w("Error removing cosplan", e) }
     }
 
+    fun changeToDoStatus(con: ConWithId, toDo: String, checked: Boolean, index: Int) {
+        var newTodo: String = if(checked) {
+            "1$toDo"
+        } else {
+            "0$toDo"
+        }
+
+        var newTodos: MutableList<String>
+                = con.con.toDo.toMutableList()
+        newTodos[index] = newTodo
+
+        Log.d("TODO", "updating to $newTodo")
+
+        FirebaseFirestore.getInstance().collection(COLLECTION_CONS).document(con.conId)
+            .update(mapOf(
+                "toDo" to newTodos))
+            .addOnSuccessListener { Log.d("tag", "todo item successfully updated!") }
+            .addOnFailureListener { e -> Log.w("Error updating todo item", e) }
+    }
+
+    fun addToDoItem(toDo: String, checked: Boolean, con: ConWithId) {
+        var newTodo: String = if(checked) {
+            "1$toDo"
+        } else {
+            "0$toDo"
+        }
+
+        var newTodos: MutableList<String>
+                = con.con.toDo.toMutableList()
+        newTodos.add(newTodo)
+
+        FirebaseFirestore.getInstance().collection(COLLECTION_CONS).document(con.conId)
+            .update(mapOf(
+                "toDo" to newTodos))
+            .addOnSuccessListener { Log.d("tag", "todo item successfully added!") }
+            .addOnFailureListener { e -> Log.w("Error adding todo item", e) }
+    }
+
+    fun deleteToDo(con: ConWithId, index: Int) {
+        var newTodos = con.con.toDo.toMutableList()
+        Log.d("DELETE", "list pre-delete:")
+        newTodos.forEachIndexed { index, item ->
+            Log.d("DELETE", "$index: $item")
+        }
+
+        Log.d("DELETE", "deleting item #$index")
+        Log.d("DELETE", newTodos.removeAt(index))
+
+        Log.d("DELETE", "new list:")
+        newTodos.forEachIndexed { index, item ->
+            Log.d("DELETE", "$index: $item")
+        }
+
+        FirebaseFirestore.getInstance().collection(COLLECTION_CONS).document(con.conId)
+            .update(mapOf(
+                "toDo" to newTodos))
+            .addOnSuccessListener { Log.d("DELETE", "todo item successfully removed!") }
+            .addOnFailureListener { e -> Log.w("Error removing todo item", e) }
+    }
+
     sealed interface ConUIState {
         object Init : ConUIState
 
