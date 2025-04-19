@@ -127,11 +127,23 @@ class ConDetailsViewModel: ViewModel() {
             newCosplanList.removeAt(0)
         }
 
-        FirebaseFirestore.getInstance().collection(ConDetailsViewModel.COLLECTION_CONS).document(con.conId)
+        FirebaseFirestore.getInstance().collection(COLLECTION_CONS).document(con.conId)
             .update(mapOf(
                 "cosplans" to newCosplanList))
             .addOnSuccessListener { Log.d("COSPLANS", "cosplan successfully added!") }
             .addOnFailureListener { e -> Log.w("Error adding cosplan :'(", e) }
+    }
+
+    fun deleteCosplan(mycon: ConWithId, cosplayToDelete: String) {
+        var newItems = mycon.con.cosplans.toMutableList()
+
+        newItems.remove(cosplayToDelete)
+
+        FirebaseFirestore.getInstance().collection(COLLECTION_CONS).document(mycon.conId)
+            .update(mapOf(
+                "cosplans" to newItems))
+            .addOnSuccessListener { Log.d("DELETE", "cosplan successfully removed!") }
+            .addOnFailureListener { e -> Log.w("Error removing cosplan", e) }
     }
 
     sealed interface ConUIState {

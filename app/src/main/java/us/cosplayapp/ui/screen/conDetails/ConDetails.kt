@@ -1,7 +1,9 @@
 package us.cosplayapp.ui.screen.conDetails
 
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
@@ -23,6 +25,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -33,6 +36,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
@@ -41,6 +46,8 @@ import us.cosplayapp.Con.Con
 import us.cosplayapp.Con.ConWithId
 import us.cosplayapp.Cosplay.CosplayWithId
 import us.cosplayapp.ui.screen.cosplay.Dropdown
+import us.cosplayapp.ui.screen.cosplayDetails.CosplayDetailsViewModel
+import us.cosplayapp.ui.screen.cosplayDetails.deleteConDialog
 
 @Composable
 fun ConDetails(
@@ -66,6 +73,11 @@ fun ConDetails(
 
     var showAddCosplanDialogue by rememberSaveable {
         mutableStateOf(false)
+    }
+
+    var cosplayToDelete by rememberSaveable {
+        mutableStateOf<String?>(null)
+
     }
 
     Column(modifier = Modifier
@@ -95,7 +107,7 @@ fun ConDetails(
                         (conListState.value as ConDetailsViewModel.ConUIState.Success).conList
                     )
                 )
-
+                val haptics = LocalHapticFeedback.current
                 ConDetails(
                     con = mycon,
                     onEditCon = {
@@ -106,6 +118,10 @@ fun ConDetails(
                     },
                     conDetailsViewModel,
                     onNavigateToCosplayDetails,
+                    onLongButtonClick = {cosplay ->
+                        haptics.performHapticFeedback(HapticFeedbackType.LongPress)
+                        cosplayToDelete = cosplay
+                    },
                     cosListState.value
                 )
 
@@ -134,18 +150,25 @@ fun ConDetails(
                             showAddCosplanDialogue = false
                         })
                 }
+                if(cosplayToDelete != null) {
+                    deleteCosplanDialog(
+                        onDismiss = { cosplayToDelete = null},
+                        onDelete = { conDetailsViewModel.deleteCosplan(mycon, cosplayToDelete!!)}
+                    )
+                }
             }
         }
     }
 }
 
-@OptIn(ExperimentalLayoutApi::class)
+@OptIn(ExperimentalLayoutApi::class, ExperimentalFoundationApi::class)
 @Composable
 fun ConDetails(con: ConWithId,
                onEditCon: (ConWithId) -> Unit = {},
                onAddCosplan: () -> Unit = {},
                conDetailsViewModel: ConDetailsViewModel,
                onNavigateToCosplayDetails: (String) -> Unit,
+               onLongButtonClick: (String) -> Unit,
                 cosListState: ConDetailsViewModel.CosplayUIState) {
     Column(modifier = Modifier.padding(10.dp)) {
         Row(modifier = Modifier.fillMaxWidth(),
@@ -198,13 +221,24 @@ fun ConDetails(con: ConWithId,
         FlowRow() {
             con.con.cosplans.forEach { cos ->
                 if(cos.trim() != "") {
-                    Button(onClick = { conDetailsViewModel.getIdByCosplay(cos, (cosListState as ConDetailsViewModel.CosplayUIState.Success).cosList)
+//                    Button(onClick = { conDetailsViewModel.getIdByCosplay(cos, (cosListState as ConDetailsViewModel.CosplayUIState.Success).cosList)
+//                        ?.let { onNavigateToCosplayDetails(it) } },
+//                        modifier = Modifier.padding(5.dp),
+//                        colors = ButtonDefaults.outlinedButtonColors(
+//                        contentColor = MaterialTheme.colorScheme.secondary,
+//                        containerColor = MaterialTheme.colorScheme.surfaceVariant
+//                    )) {
+//                        Text(text = cos)
+//                    }
+                    Surface(modifier = Modifier.padding(5.dp)
+                        .combinedClickable(
+                            onClick = { conDetailsViewModel.getIdByCosplay(cos, (cosListState as ConDetailsViewModel.CosplayUIState.Success).cosList)
                         ?.let { onNavigateToCosplayDetails(it) } },
-                        modifier = Modifier.padding(5.dp),
-                        colors = ButtonDefaults.outlinedButtonColors(
-                        contentColor = MaterialTheme.colorScheme.secondary,
-                        containerColor = MaterialTheme.colorScheme.surfaceVariant
-                    )) {
+                            onLongClick = {
+                                onLongButtonClick(cos)
+                            }
+                        ),
+                        color = MaterialTheme.colorScheme.surfaceVariant) {
                         Text(text = cos)
                     }
                 }
@@ -268,6 +302,35 @@ fun AddCosplanDialogue(
                         containerColor = MaterialTheme.colorScheme.surfaceVariant
                     )) {
                 Text(text = "Add")
+            }
+        }
+    }
+}
+
+@Composable
+fun deleteCosplanDialog(onDismiss: () -> Unit, onDelete: () -> Unit) {
+    Dialog(
+        onDismissRequest = onDismiss
+    ) {
+
+        Column(
+            Modifier
+                .background(
+                    color = MaterialTheme.colorScheme.secondaryContainer,
+                    shape = MaterialTheme.shapes.medium
+                )
+                .padding(10.dp)
+        ) {
+            Button(modifier = Modifier.padding(10.dp),
+                colors = ButtonDefaults.outlinedButtonColors(
+                    contentColor = MaterialTheme.colorScheme.secondary,
+                    containerColor = MaterialTheme.colorScheme.surfaceVariant
+                ),
+                onClick =  {
+                    onDelete()
+                    onDismiss()
+                }) {
+                Text(text = "Delete")
             }
         }
     }

@@ -110,7 +110,6 @@ fun CosplayDetails(
 
     var conToDelete by rememberSaveable {
         mutableStateOf<String?>(null)
-
     }
 
     Column(modifier = Modifier
