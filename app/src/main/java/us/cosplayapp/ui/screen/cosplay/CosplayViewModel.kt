@@ -184,9 +184,10 @@ class CosplayViewModel: ViewModel() {
     fun deleteCosplay(id: String) {
         FirebaseFirestore.getInstance().collection(CosplayDetailsViewModel.COLLECTION_COSPLAYS).document(id)
             .delete()
-            .addOnSuccessListener { Log.d("DELETE", "DocumentSnapshot successfully deleted!") }
+            .addOnSuccessListener { Log.d("DELETE", "DocumentSnapshot successfully deleted!")
+                filter()}
             .addOnFailureListener { e -> Log.w("DELETE", "Error deleting document", e) }
-        //TODO: need to trigger a reload of the list after this is done...
+
     }
 }
 
