@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AddCircleOutline
@@ -57,15 +58,11 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.google.firebase.firestore.FirebaseFirestore
 import us.cosplayapp.Con.Con
 import us.cosplayapp.Con.ConWithId
 import us.cosplayapp.Cosplay.CosplayWithId
 import us.cosplayapp.ui.screen.cosplay.Dropdown
-import us.cosplayapp.ui.screen.cosplayDetails.CheckList
-import us.cosplayapp.ui.screen.cosplayDetails.CosplayDetailsViewModel
 import us.cosplayapp.ui.screen.cosplayDetails.TransparentTextField
-import us.cosplayapp.ui.screen.cosplayDetails.deleteConDialog
 
 @Composable
 fun ConDetails(
@@ -236,15 +233,6 @@ fun ConDetails(con: ConWithId,
         FlowRow() {
             con.con.cosplans.forEach { cos ->
                 if(cos.trim() != "") {
-//                    Button(onClick = { conDetailsViewModel.getIdByCosplay(cos, (cosListState as ConDetailsViewModel.CosplayUIState.Success).cosList)
-//                        ?.let { onNavigateToCosplayDetails(it) } },
-//                        modifier = Modifier.padding(5.dp),
-//                        colors = ButtonDefaults.outlinedButtonColors(
-//                        contentColor = MaterialTheme.colorScheme.secondary,
-//                        containerColor = MaterialTheme.colorScheme.surfaceVariant
-//                    )) {
-//                        Text(text = cos)
-//                    }
                     Surface(modifier = Modifier.padding(5.dp)
                         .combinedClickable(
                             onClick = { conDetailsViewModel.getIdByCosplay(cos, (cosListState as ConDetailsViewModel.CosplayUIState.Success).cosList)
@@ -253,8 +241,9 @@ fun ConDetails(con: ConWithId,
                                 onLongButtonClick(cos)
                             }
                         ),
-                        color = MaterialTheme.colorScheme.surfaceVariant) {
-                        Text(text = cos)
+                        color = MaterialTheme.colorScheme.surfaceVariant,
+                        shape = RoundedCornerShape(20.dp)) {
+                        Text(text = cos, modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp))
                     }
                 }
 

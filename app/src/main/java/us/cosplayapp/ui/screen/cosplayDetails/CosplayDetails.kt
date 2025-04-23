@@ -24,6 +24,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -130,6 +131,7 @@ fun CosplayDetails(
                     (cosplayListState.value as CosplayDetailsViewModel.CosplayDetailsUIState.Success).cosList
                 ))
             val haptics = LocalHapticFeedback.current
+
             CosplayDetails(
                 mycos,
                 onEditCosplay = { cosplay ->
@@ -170,11 +172,7 @@ fun CosplayDetails(
 
             if(showAddConDialogue) {
                 AddConDialogue(
-                    cosplay = CosplayWithId(id,
-                        cosplayDetailsViewModel.getCosplayById(
-                            id,
-                            (cosplayListState.value as CosplayDetailsViewModel.CosplayDetailsUIState.Success).cosList
-                        )),
+                    cosplay = mycos,
                     (conListState.value as CosplayDetailsViewModel.ConUIState.Success).conList,
                     cosplayDetailsViewModel = cosplayDetailsViewModel,
                     {
@@ -296,39 +294,16 @@ fun CosplayDetails(cosplay: CosplayWithId,
     Text(
         text = cosplay.cosplay.notes,
         style = MaterialTheme.typography.bodyMedium,
-        modifier = Modifier.padding(10.dp)
+        modifier = Modifier.padding(horizontal = 15.dp, vertical = 10.dp)
     )
     Text(
         text = "con appearances",
         style = MaterialTheme.typography.displayMedium,
         modifier = Modifier.padding(10.dp)
     )
-    FlowRow() {
+    FlowRow(modifier = Modifier.padding(horizontal = 10.dp)) {
         cosplay.cosplay.consList.forEach { con ->
             if(con.trim() != "") {
-//                Button(
-//                    onClick = {
-//                        cosplayDetailsViewModel.getIdByCon(con,
-//                            (conListState as CosplayDetailsViewModel.ConUIState.Success).conList)
-//                    ?.let { onNavigateToConDetails(it) }
-//                              },
-//                    modifier = Modifier.padding(5.dp)
-//                        .combinedClickable(
-//                            onClick = {
-//                                cosplayDetailsViewModel.getIdByCon(con,
-//                                    (conListState as CosplayDetailsViewModel.ConUIState.Success).conList)
-//                                    ?.let { onNavigateToConDetails(it) }
-//                            },
-//                        onLongClick = {
-//                            onLongButtonClick
-//                        }
-//                    ),
-//                    colors = ButtonDefaults.outlinedButtonColors(
-//                        contentColor = MaterialTheme.colorScheme.secondary,
-//                        containerColor = MaterialTheme.colorScheme.surfaceVariant
-//                    )){
-//                    Text(text = con)
-//                }
                 Surface(modifier = Modifier.padding(5.dp)
                     .combinedClickable(
                         onClick = {
@@ -340,8 +315,9 @@ fun CosplayDetails(cosplay: CosplayWithId,
                             onLongButtonClick(con)
                         }
                     ),
-                    color = MaterialTheme.colorScheme.surfaceVariant) {
-                    Text(text = con)
+                    color = MaterialTheme.colorScheme.surfaceVariant,
+                    shape = RoundedCornerShape(20.dp)) {
+                    Text(text = con, modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp))
                 }
             }
 

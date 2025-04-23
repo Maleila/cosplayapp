@@ -71,21 +71,6 @@ class ConViewModel: ViewModel() {
             snapshotListener.remove()
         }
     }
-
-    suspend fun verifyCon(id: String): Con? {
-        val snapshot =
-            FirebaseFirestore.getInstance().collection(COLLECTION_CONS).document(id).get().await()
-        return snapshot.toObject(Con::class.java)
-    }
-
-//  fun verifyCon(id: String) = callbackFlow {
-//        val snapshot =
-//            FirebaseFirestore.getInstance().collection(COLLECTION_CONS).document(id).get().await()
-//        val response = snapshot.toObject(Con::class.java)
-//
-//        trySend(response) // emit this value through the flow
-//    }
-
 }
 
 sealed interface ConUploadUiState {

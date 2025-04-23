@@ -72,7 +72,6 @@ class ConDetailsViewModel: ViewModel() {
     fun getConById(id: String, cons: List<ConWithId>): Con {
         for(c in cons) {
             if(c.conId == id) {
-                Log.d("CON", c.con.name)
                 return c.con
             }
         }
@@ -90,8 +89,6 @@ class ConDetailsViewModel: ViewModel() {
     }
 
     fun editCon(newCon: ConWithId) {
-        Log.d("EDITCON", newCon.conId)
-
         FirebaseFirestore.getInstance().collection(COLLECTION_CONS).document(newCon.conId)
             .update(mapOf(
                 "name" to newCon.con.name,
@@ -157,8 +154,6 @@ class ConDetailsViewModel: ViewModel() {
                 = con.con.toDo.toMutableList()
         newTodos[index] = newTodo
 
-        Log.d("TODO", "updating to $newTodo")
-
         FirebaseFirestore.getInstance().collection(COLLECTION_CONS).document(con.conId)
             .update(mapOf(
                 "toDo" to newTodos))
@@ -186,18 +181,9 @@ class ConDetailsViewModel: ViewModel() {
 
     fun deleteToDo(con: ConWithId, index: Int) {
         var newTodos = con.con.toDo.toMutableList()
-        Log.d("DELETE", "list pre-delete:")
-        newTodos.forEachIndexed { index, item ->
-            Log.d("DELETE", "$index: $item")
-        }
 
         Log.d("DELETE", "deleting item #$index")
         Log.d("DELETE", newTodos.removeAt(index))
-
-        Log.d("DELETE", "new list:")
-        newTodos.forEachIndexed { index, item ->
-            Log.d("DELETE", "$index: $item")
-        }
 
         FirebaseFirestore.getInstance().collection(COLLECTION_CONS).document(con.conId)
             .update(mapOf(

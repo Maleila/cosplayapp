@@ -51,7 +51,7 @@ fun HomeScreen(
         topBar = {
             Column(
                 modifier = Modifier
-                    .fillMaxWidth().fillMaxHeight(0.3f),
+                    .fillMaxWidth().fillMaxHeight(0.4f),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center
             ) {
@@ -103,7 +103,7 @@ fun HomeScreen(
         Column(modifier = Modifier
             .padding(it)
             .fillMaxSize(),
-            verticalArrangement = Arrangement.Center,
+            verticalArrangement = Arrangement.Top,
             horizontalAlignment = Alignment.CenterHorizontally) {
             Text(text = "upcoming cons",
                 style = MaterialTheme.typography.displayMedium)
@@ -123,18 +123,19 @@ fun HomeScreen(
                         modifier = Modifier.padding(10.dp)
                     )
                 } else {
-                    LazyColumn(modifier = Modifier.fillMaxWidth(0.92f)) {
-                        val upcomingCons: List<ConWithId> = homeViewModel.getUpcomingCons((conListState.value as HomeViewModel.ConUIState.Success).conList)
-                        if(upcomingCons.isEmpty()) {
-//                            Text(text = "No cons in the next 90 days",
-//                                modifier = Modifier.padding(10.dp))
-                        } else {
-                            items(upcomingCons) {
-                                ConCard(con = it.con,
-                                    onCardClicked = { onNavigateToConDetails(it.conId) })
-                            }
+                    val upcomingCons: List<ConWithId> = homeViewModel.getUpcomingCons((conListState.value as HomeViewModel.ConUIState.Success).conList)
+                    if(upcomingCons.isEmpty()) {
+                        Text(
+                            text = "no cons in the next 90 days",
+                            modifier = Modifier.padding(10.dp)
+                        )
+                    } else {
+                        LazyColumn(modifier = Modifier.fillMaxWidth(0.92f)) {
+                                items(upcomingCons) {
+                                    ConCard(con = it.con,
+                                        onCardClicked = { onNavigateToConDetails(it.conId) })
+                                }
                         }
-
                     }
                 }
             }
