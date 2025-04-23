@@ -1,7 +1,9 @@
 package us.cosplayapp.ui.screen.cosplay
 
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -45,11 +47,16 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.lifecycle.viewmodel.compose.viewModel
 import us.cosplayapp.Cosplay.Cosplay
+import us.cosplayapp.Cosplay.CosplayWithId
+import us.cosplayapp.ui.screen.conDetails.ConDetailsViewModel
+import us.cosplayapp.ui.screen.conDetails.deleteCosplanDialog
 
 @Composable
 fun CosplayScreen(
@@ -68,6 +75,10 @@ fun CosplayScreen(
     val cosplayListState = cosplayViewModel.cosList().collectAsState(
         initial = CosplayUploadUiState.Init
     )
+
+    var toDelete: String? by rememberSaveable {
+        mutableStateOf(null)
+    }
 
     LaunchedEffect(true) {
         cosplayViewModel.filter()
@@ -149,10 +160,15 @@ fun CosplayScreen(
                             )
                         }
                     }
+                    val haptics = LocalHapticFeedback.current
                     LazyColumn(modifier = Modifier.fillMaxWidth(0.92f)) {
                         items((cosplayViewModel.filterUiState as CosplayUploadUiState.Success).cosList) {
-                            CosplayCard(cosplay = it.cosplay,
-                                onCardClicked = { onNavigateToDetailsScreen(it.cosId) }
+                            CosplayCard(cosplay = it,
+                                onCardClicked = { onNavigateToDetailsScreen(it.cosId)},
+                                    onLongClick = { cosplay ->
+                                        haptics.performHapticFeedback(HapticFeedbackType.LongPress)
+                                        toDelete = cosplay
+                                    }
                             )
                         }
                     }
@@ -172,18 +188,27 @@ fun CosplayScreen(
                 {showFilterDialogue = false}
             )
         }
+
+        if(toDelete != null) {
+            deleteCosplayDialog(
+                onDismiss = { toDelete = null},
+                onDelete = { cosplayViewModel.deleteCosplay(toDelete!!)}
+            )
+        }
     }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun CosplayCard(
-    cosplay: Cosplay,
-    onCardClicked: () -> Unit = {}
+    cosplay: CosplayWithId,
+    onCardClicked: () -> Unit = {},
+    onLongClick: (String) -> Unit
 ) {
 
     var charTextColor: Color
-    charTextColor = if(cosplay.progress == "Not started") {
+    charTextColor = if(cosplay.cosplay.progress == "Not started") {
         Color.Red
-    } else if(cosplay.progress == "In Progress") {
+    } else if(cosplay.cosplay.progress == "In Progress") {
         Color(0xFFFF9800)
     } else {
         Color.Green
@@ -196,7 +221,12 @@ fun CosplayCard(
         shape = RoundedCornerShape(24.dp),
         modifier = Modifier
             .padding(vertical = 10.dp)
-            .clickable { onCardClicked() }
+            .combinedClickable(
+                onClick = { onCardClicked() },
+                onLongClick = {
+                    onLongClick(cosplay.cosId)
+                }
+            ),
     ) {
         Column(
             modifier = Modifier
@@ -213,11 +243,11 @@ fun CosplayCard(
                     modifier = Modifier
                         .weight(1f)
                 ) {
-                    Text(text = cosplay.character,
+                    Text(text = cosplay.cosplay.character,
                         color = charTextColor,
                         style = MaterialTheme.typography.displaySmall)
-                    Text(text = cosplay.media)
-                    Text(text = cosplay.complexity)
+                    Text(text = cosplay.cosplay.media)
+                    Text(text = cosplay.cosplay.complexity)
                 }
             }
         }
@@ -570,6 +600,35 @@ fun Dropdown(
                         },
                     )
                 }
+            }
+        }
+    }
+}
+
+@Composable
+fun deleteCosplayDialog(onDismiss: () -> Unit, onDelete: () -> Unit) {
+    Dialog(
+        onDismissRequest = onDismiss
+    ) {
+
+        Column(
+            Modifier
+                .background(
+                    color = MaterialTheme.colorScheme.secondaryContainer,
+                    shape = MaterialTheme.shapes.medium
+                )
+                .padding(10.dp)
+        ) {
+            Button(modifier = Modifier.padding(10.dp),
+                colors = ButtonDefaults.outlinedButtonColors(
+                    contentColor = MaterialTheme.colorScheme.secondary,
+                    containerColor = MaterialTheme.colorScheme.surfaceVariant
+                ),
+                onClick =  {
+                    onDelete()
+                    onDismiss()
+                }) {
+                Text(text = "Delete")
             }
         }
     }

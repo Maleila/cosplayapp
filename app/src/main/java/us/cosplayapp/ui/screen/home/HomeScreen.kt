@@ -160,8 +160,9 @@ fun HomeScreen(
                     LazyColumn(modifier = Modifier.fillMaxWidth(0.92f)) {
                         items((cosplayListState.value as HomeViewModel.CosplayUIState.Success).cosList) {
                             if(it.cosplay.progress == "In Progress") {
-                                CosplayCard(cosplay = it.cosplay,
-                                    onCardClicked = { onNavigateToCosplayDetails(it.cosId) })
+                                CosplayCard(cosplay = it,
+                                    onCardClicked = { onNavigateToCosplayDetails(it.cosId) },
+                                    onLongClick = {})
                             }
                         }
                     }

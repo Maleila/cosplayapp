@@ -13,6 +13,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import us.cosplayapp.Cosplay.CosplayWithId
 import us.cosplayapp.Cosplay.Cosplay
+import us.cosplayapp.ui.screen.cosplayDetails.CosplayDetailsViewModel
 
 class CosplayViewModel: ViewModel() {
     companion object {
@@ -178,6 +179,14 @@ class CosplayViewModel: ViewModel() {
             return "Filter by: " + result.dropLast(2)
         }
         return "filter by: all cosplays"
+    }
+
+    fun deleteCosplay(id: String) {
+        FirebaseFirestore.getInstance().collection(CosplayDetailsViewModel.COLLECTION_COSPLAYS).document(id)
+            .delete()
+            .addOnSuccessListener { Log.d("DELETE", "DocumentSnapshot successfully deleted!") }
+            .addOnFailureListener { e -> Log.w("DELETE", "Error deleting document", e) }
+        //TODO: need to trigger a reload of the list after this is done...
     }
 }
 
