@@ -72,6 +72,7 @@ import us.cosplayapp.Cosplay.Cosplay
 import us.cosplayapp.Cosplay.CosplayWithId
 import us.cosplayapp.ui.screen.cosplay.Dropdown
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.IntSize
@@ -789,12 +790,21 @@ fun FullScreenImage(uri: Uri, onDismiss: () -> Unit) {
 private fun ImageWithZoom(uri: Uri, modifier: Modifier = Modifier, onDismiss: () -> Unit) {
     // set up all transformation states
     var scale by remember { mutableStateOf(1f) }
-    var rotation by remember { mutableStateOf(0f) }
     var offset by remember { mutableStateOf(Offset.Zero) }
+    var size by remember { mutableStateOf(IntSize.Zero)}
     val state = rememberTransformableState { zoomChange, offsetChange, rotationChange ->
-        scale *= zoomChange
-        rotation += rotationChange
+        if(scale*zoomChange >= 1) {
+            scale *= zoomChange
+        }
+
+        //based on https://stackoverflow.com/questions/71810485/how-to-constraint-an-image-panning-to-the-edges-of-the-box-in-jetpack-compose
+        val maxX = (size.width * (scale - 1) / 2f)
+        val maxY = (size.height * (scale - 1) / 2f)
         offset += offsetChange
+        offset = Offset(
+            offset.x.coerceIn(-maxX, maxX),
+            offset.y.coerceIn(-maxY, maxY))
+
     }
     Image(
         painter = rememberAsyncImagePainter(uri),
@@ -805,7 +815,6 @@ private fun ImageWithZoom(uri: Uri, modifier: Modifier = Modifier, onDismiss: ()
             .graphicsLayer(
                 scaleX = scale,
                 scaleY = scale,
-                //rotationZ = rotation,
                 translationX = offset.x,
                 translationY = offset.y
             )
@@ -821,6 +830,7 @@ private fun ImageWithZoom(uri: Uri, modifier: Modifier = Modifier, onDismiss: ()
                     false
                 }
             }
+            .onSizeChanged { size = it }
     )
 }
 

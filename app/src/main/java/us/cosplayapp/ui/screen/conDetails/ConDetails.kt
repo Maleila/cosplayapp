@@ -1,6 +1,7 @@
 package us.cosplayapp.ui.screen.conDetails
 
 import android.util.Log
+import android.view.KeyEvent
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -45,6 +46,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.input.key.KeyEventType
+import androidx.compose.ui.input.key.key
+import androidx.compose.ui.input.key.onKeyEvent
+import androidx.compose.ui.input.key.type
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
@@ -183,13 +189,8 @@ fun ConDetails(con: ConWithId,
                onLongButtonClick: (String) -> Unit,
                 cosListState: ConDetailsViewModel.CosplayUIState) {
     Column(modifier = Modifier.padding(10.dp)) {
-        Row(modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.Center) {
-            Text(text = con.con.name,
-                style = MaterialTheme.typography.displayLarge,
-                modifier = Modifier.padding(10.dp),
-                softWrap = true,
-                textAlign = TextAlign.Center)
+        Row(modifier = Modifier.fillMaxWidth(0.975f),
+            horizontalArrangement = Arrangement.End) {
             Icon(
                 imageVector = Icons.Filled.Settings,
                 contentDescription = "edit",
@@ -199,14 +200,19 @@ fun ConDetails(con: ConWithId,
                 tint = MaterialTheme.colorScheme.secondary
             )
         }
+        Row(modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.Center) {
+            Text(text = con.con.name,
+                style = MaterialTheme.typography.displayLarge,
+                modifier = Modifier.padding(10.dp),
+                softWrap = true,
+                textAlign = TextAlign.Center)
+        }
         Row(
             verticalAlignment = Alignment.CenterVertically
         ){
             Icon(imageVector = Icons.Filled.LocationOn,
                 contentDescription = "location marker",
-                modifier = Modifier.clickable {
-                    onEditCon(con)
-                },
                 tint = MaterialTheme.colorScheme.secondary)
             Text(
                 text = con.con.location,
@@ -217,9 +223,6 @@ fun ConDetails(con: ConWithId,
         ) {
             Icon(imageVector = Icons.Filled.CalendarMonth,
                 contentDescription = "date",
-                modifier = Modifier.clickable {
-                    onEditCon(con)
-                },
                 tint = MaterialTheme.colorScheme.secondary)
             Text(
                 text = con.con.dates[0] + " - " + con.con.dates[1],
@@ -455,7 +458,7 @@ fun EditDialogue(
                 Button(modifier = Modifier.padding(10.dp),
                     colors = ButtonDefaults.outlinedButtonColors(
                         contentColor = MaterialTheme.colorScheme.secondary,
-                        containerColor = MaterialTheme.colorScheme.surfaceVariant
+                        containerColor = Color.Red
                     ),
                     onClick = {
                         onDialogDismiss()
@@ -540,6 +543,16 @@ fun CheckList(con: ConWithId,
                                     .clickable {
                                         itemModifiable = true
                                         //should also focus so you don't have to click twice
+                                    }
+                                    .onKeyEvent {
+                                        if(it.type == KeyEventType.KeyDown && it.key == Key.A) {
+                                            onEditItem(con, editedTodo, item[0] == '1', index)
+                                            itemModifiable = false
+                                            Log.d("KEY", "enter pressed!")
+                                            true
+                                        } else {
+                                            false
+                                        }
                                     },
                                 cursorBrush = SolidColor(MaterialTheme.colorScheme.secondary),
                                 textStyle = TextStyle(MaterialTheme.colorScheme.secondary),
