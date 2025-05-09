@@ -227,7 +227,7 @@ fun CosplayDetails(cosplay: CosplayWithId,
             Color(0xFFFF9800)
         }
         else -> {
-            Color.Green
+            Color(0xFF4DAF51)
         }
     }
 

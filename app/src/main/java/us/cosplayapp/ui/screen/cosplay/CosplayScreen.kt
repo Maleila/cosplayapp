@@ -206,7 +206,7 @@ fun CosplayCard(
     } else if(cosplay.cosplay.progress == "In Progress") {
         Color(0xFFFF9800)
     } else {
-        Color.Green
+        Color(0xFF4DAF51)
     }
 
     Card(
